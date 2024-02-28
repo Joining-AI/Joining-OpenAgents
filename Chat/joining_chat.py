@@ -1,134 +1,134 @@
-import os
-import json
-import time
-from dotenv import load_dotenv
-from LLM_API import AuthenticatedRequestSender
-from LLM_API import OpenAIService
-from FileProcess import FileProcessor
-from Memory import Embedding
-
-class JoiningChat:
-    def __init__(self, service_type=None, dotenv_path=None, conversation_list=None):
-        if dotenv_path == None:
-            dotenv_path = os.path.join(os.getcwd(), '.env')
-        root_path = dotenv_path.rstrip('.env')
-        load_dotenv(dotenv_path)
-        self.file_handler = FileProcessor(root_path)
-        self.embedder = Embedding()
-        if service_type in ['sensetime', None]:
-            self.service = AuthenticatedRequestSender()
-        elif service_type == 'openai':
-            self.service = OpenAIService()
-        else:
-            raise ValueError('æœªçŸ¥çš„æœåŠ¡ç±»å‹')
-        
-        self.window_length = 4096
-
-        self.conversation_info = {}
-        self.conversation_list = []
-
-        self.current_conversation_name = ""
-        if conversation_list == None:
-            self.conversation_list = [{"role": "system", "content": "Your setting is:"}]
-            
-    def add_conversation_info(self, conversation_name: str, conversation_list: list):
-        """
-        æ·»åŠ å¯¹è¯ä¿¡æ¯åˆ°å­—å…¸ä¸­
-        """
-        self.conversation_info[conversation_name] = conversation_list   
-        
-    def add_conversation(self, role: str, content: str) -> None:
-        """
-        æ·»åŠ å¯¹è¯è®°å½•
-        """
-        self.conversation_list.append({'role': role, 'content': content})         
-
-    def renew_conversation_info(self, response: str):
-        self.conversation_list.append({"role": "assistant", "content": response})
-        self.conversation_info[self.current_conversation_name] = self.conversation_list
-       
-    def generate_conversation_name(self, conversation_content: str) -> str:
-        """
-        æ ¹æ®å¯¹è¯å†…å®¹è‡ªåŠ¨ç”Ÿæˆå¯¹è¯åç§°ã€‚
-        """
-        # è¿™é‡Œç®€åŒ–ä¸ºä½¿ç”¨æ—¶é—´æˆ³å’Œå¯¹è¯å†…å®¹çš„å‰å‡ ä¸ªå­—ä½œä¸ºåç§°
-        timestamp = time.strftime("%Y%m%d%H%M%S")
-        summary = conversation_content + "..." 
-        request = 'Please generate a name for the conversation based on the summary of following contents within 30 tokens: ' + summary
-        name = self.service.ask_once(request)
-        return name
-    
-    def name_conversation(self, name=None):
-        """
-        ç»™å½“å‰å¯¹è¯å‘½åå¹¶ä¿å­˜ã€‚å¦‚æœæ²¡æœ‰æä¾›åç§°ï¼Œå°†è‡ªåŠ¨ç”Ÿæˆä¸€ä¸ªã€‚
-        """
-        # ä»…ä½¿ç”¨self.conversation_listä¸­æœ€åä¸¤ä¸ªå…ƒç´ ä¸­çš„content
-        content = "".join([c["content"] for c in self.conversation_list[-2:]])
-        if name is None:
-            name = self.generate_conversation_name(content)
-        
-        self.add_conversation_info(name, self.conversation_list)
-        print(f"[ç³»ç»Ÿ]: å¯¹è¯å·²å‘½åä¸º '{name}' å¹¶ä¿å­˜ã€‚")
-        self.current_conversation_name = name  # è®°å½•å½“å‰å¯¹è¯çš„åç§°
-
-    def summarize_conversation(self) -> bool:
-        """
-        å¯¹å½“å‰çš„å¯¹è¯èƒŒæ™¯ä¿¡æ¯è¿›è¡Œæ€»ç»“ï¼Œä»¥å‡å°‘é•¿åº¦ï¼Œå¹¶ä¿è¯essential_conversationsçš„å†…å®¹ä¸è¢«ä¿®æ”¹ã€‚
-        """
-        window_length = self.window_length  # å¯è®¾ç½®çš„çª—å£é•¿åº¦
-        essential_conversations = [self.conversation_list[1], self.conversation_list[-1]]
-
-        # è®¡ç®—essential_conversationsçš„é•¿åº¦
-        essential_length = sum(len(conv["content"]) for conv in essential_conversations)
-        # å¦‚æœessential_conversationsçš„é•¿åº¦å·²ç»è¶…è¿‡çª—å£é•¿åº¦
-        if essential_length > window_length :
-            print("[ç³»ç»Ÿ]: è¾“å…¥è¿‡é•¿ï¼Œè¯·å‡å°‘å¿…è¦å¯¹è¯å†…å®¹çš„é•¿åº¦ã€‚")
-            return False
-
-        # åˆå§‹åŒ–éå¿…è¦å¯¹è¯å†…å®¹çš„å¤„ç†
-        non_essential_conversations = self.conversation_list[1:-1]
-        if not non_essential_conversations:
-            return True
-        summarized_content = non_essential_conversations
-        while essential_length + sum(len(conv["content"]) for conv in summarized_content) > window_length :
-            storage=[]
-            # æŒ‰ç…§çª—å£é•¿åº¦åˆ‡å‰²å¹¶æ€»ç»“éå¿…è¦å¯¹è¯å†…å®¹
-            current_summary = ""
-            for conv in summarized_content:
-                if len(current_summary) + len(conv["content"]) > window_length :
-                    # å¦‚æœåŠ ä¸Šå½“å‰å¯¹è¯åè¶…è¿‡çª—å£é•¿åº¦ï¼Œåˆ™å…ˆå¯¹ä¹‹å‰çš„å†…å®¹è¿›è¡Œæ€»ç»“
-                    summary = self.service.ask_once(current_summary) if current_summary else ""
-                    storage.append({"role": "system", "content": summary})
-                    current_summary = conv["content"]  # å¼€å§‹æ–°çš„å†…å®¹æ®µ
-                else:
-                    current_summary += " " + conv["content"]
-
-            # å¯¹æœ€åä¸€ä¸ªæ®µè½è¿›è¡Œæ€»ç»“
-            if current_summary:
-                summary = self.service.ask_once(current_summary)
-                storage.append({"role": "system", "content": summary})
-            summarized_content = storage
-            
-                    # è®¡ç®—æ–°çš„æ€»é•¿åº¦ï¼Œæ£€æŸ¥æ˜¯å¦æ»¡è¶³è¦æ±‚
-        new_total_length = essential_length + sum(len(conv["content"]) for conv in summarized_content)
-        if new_total_length <= window_length :
-            # å¦‚æœæ»¡è¶³è¦æ±‚ï¼Œæ›´æ–°å¯¹è¯åˆ—è¡¨
-            self.conversation_list = [self.conversation_list[0]] + [essential_conversations[0]] + summarized_content + [essential_conversations[1]]
-            return True
-        else:
-            print("[ç³»ç»Ÿ]: å³ä½¿ç»è¿‡æ€»ç»“ï¼Œè¾“å…¥é•¿åº¦ä»ç„¶è¿‡é•¿ã€‚")
-            return False
-            
-    def process_input(self,input):
-        self.conversation_list.append({"role": "user", "content": input})
-            # åœ¨å‘é€è¯·æ±‚ä¹‹å‰ï¼Œç¡®ä¿èƒŒæ™¯ä¿¡æ¯é•¿åº¦ç¬¦åˆè¦æ±‚
-        if len(self.conversation_list) >= 2:  # å½“å¯¹è¯åˆ—è¡¨è¶…è¿‡2æ¡ï¼ˆåŒ…æ‹¬ç³»ç»Ÿåˆå§‹åŒ–ä¿¡æ¯ï¼‰æ—¶å¼€å§‹æ£€æŸ¥é•¿åº¦
-            if not self.summarize_conversation():
-                return "[ç³»ç»Ÿ]: æ— æ³•ç»§ç»­å¤„ç†ï¼Œå› ä¸ºå¯¹è¯å†…å®¹è¿‡é•¿ã€‚"
-            
-        response = self.service.ask_once(input)
-        self.renew_conversation_info(response)
-        if len(self.conversation_list) == 3:
-            self.name_conversation()
-        
+import os
+import json
+import time
+from dotenv import load_dotenv
+from LLM_API import AuthenticatedRequestSender
+from LLM_API import OpenAIService
+from FileProcess import FileProcessor
+from Memory import Embedding
+
+class JoiningChat:
+    def __init__(self, service_type=None, dotenv_path=None, conversation_list=None):
+        if dotenv_path == None:
+            dotenv_path = os.path.join(os.getcwd(), '.env')
+        root_path = dotenv_path.rstrip('.env')
+        load_dotenv(dotenv_path)
+        self.file_handler = FileProcessor(root_path)
+        self.embedder = Embedding()
+        if service_type in ['sensetime', None]:
+            self.service = AuthenticatedRequestSender()
+        elif service_type == 'openai':
+            self.service = OpenAIService()
+        else:
+            raise ValueError('Î´ÖªµÄ·şÎñÀàĞÍ')
+        
+        self.window_length = 4096
+
+        self.conversation_info = {}
+        self.conversation_list = []
+
+        self.current_conversation_name = ""
+        if conversation_list == None:
+            self.conversation_list = [{"role": "system", "content": "Your setting is:"}]
+            
+    def add_conversation_info(self, conversation_name: str, conversation_list: list):
+        """
+        Ìí¼Ó¶Ô»°ĞÅÏ¢µ½×ÖµäÖĞ
+        """
+        self.conversation_info[conversation_name] = conversation_list   
+        
+    def add_conversation(self, role: str, content: str) -> None:
+        """
+        Ìí¼Ó¶Ô»°¼ÇÂ¼
+        """
+        self.conversation_list.append({'role': role, 'content': content})         
+
+    def renew_conversation_info(self, response: str):
+        self.conversation_list.append({"role": "assistant", "content": response})
+        self.conversation_info[self.current_conversation_name] = self.conversation_list
+       
+    def generate_conversation_name(self, conversation_content: str) -> str:
+        """
+        ¸ù¾İ¶Ô»°ÄÚÈİ×Ô¶¯Éú³É¶Ô»°Ãû³Æ¡£
+        """
+        # ÕâÀï¼ò»¯ÎªÊ¹ÓÃÊ±¼ä´ÁºÍ¶Ô»°ÄÚÈİµÄÇ°¼¸¸ö×Ö×÷ÎªÃû³Æ
+        timestamp = time.strftime("%Y%m%d%H%M%S")
+        summary = conversation_content + "..." 
+        request = 'Please generate a name for the conversation based on the summary of following contents within 30 tokens: ' + summary
+        name = self.service.ask_once(request)
+        return name
+    
+    def name_conversation(self, name=None):
+        """
+        ¸øµ±Ç°¶Ô»°ÃüÃû²¢±£´æ¡£Èç¹ûÃ»ÓĞÌá¹©Ãû³Æ£¬½«×Ô¶¯Éú³ÉÒ»¸ö¡£
+        """
+        # ½öÊ¹ÓÃself.conversation_listÖĞ×îºóÁ½¸öÔªËØÖĞµÄcontent
+        content = "".join([c["content"] for c in self.conversation_list[-2:]])
+        if name is None:
+            name = self.generate_conversation_name(content)
+        
+        self.add_conversation_info(name, self.conversation_list)
+        print(f"[ÏµÍ³]: ¶Ô»°ÒÑÃüÃûÎª '{name}' ²¢±£´æ¡£")
+        self.current_conversation_name = name  # ¼ÇÂ¼µ±Ç°¶Ô»°µÄÃû³Æ
+
+    def summarize_conversation(self) -> bool:
+        """
+        ¶Ôµ±Ç°µÄ¶Ô»°±³¾°ĞÅÏ¢½øĞĞ×Ü½á£¬ÒÔ¼õÉÙ³¤¶È£¬²¢±£Ö¤essential_conversationsµÄÄÚÈİ²»±»ĞŞ¸Ä¡£
+        """
+        window_length = self.window_length  # ¿ÉÉèÖÃµÄ´°¿Ú³¤¶È
+        essential_conversations = [self.conversation_list[1], self.conversation_list[-1]]
+
+        # ¼ÆËãessential_conversationsµÄ³¤¶È
+        essential_length = sum(len(conv["content"]) for conv in essential_conversations)
+        # Èç¹ûessential_conversationsµÄ³¤¶ÈÒÑ¾­³¬¹ı´°¿Ú³¤¶È
+        if essential_length > window_length :
+            print("[ÏµÍ³]: ÊäÈë¹ı³¤£¬Çë¼õÉÙ±ØÒª¶Ô»°ÄÚÈİµÄ³¤¶È¡£")
+            return False
+
+        # ³õÊ¼»¯·Ç±ØÒª¶Ô»°ÄÚÈİµÄ´¦Àí
+        non_essential_conversations = self.conversation_list[1:-1]
+        if not non_essential_conversations:
+            return True
+        summarized_content = non_essential_conversations
+        while essential_length + sum(len(conv["content"]) for conv in summarized_content) > window_length :
+            storage=[]
+            # °´ÕÕ´°¿Ú³¤¶ÈÇĞ¸î²¢×Ü½á·Ç±ØÒª¶Ô»°ÄÚÈİ
+            current_summary = ""
+            for conv in summarized_content:
+                if len(current_summary) + len(conv["content"]) > window_length :
+                    # Èç¹û¼ÓÉÏµ±Ç°¶Ô»°ºó³¬¹ı´°¿Ú³¤¶È£¬ÔòÏÈ¶ÔÖ®Ç°µÄÄÚÈİ½øĞĞ×Ü½á
+                    summary = self.service.ask_once(current_summary) if current_summary else ""
+                    storage.append({"role": "system", "content": summary})
+                    current_summary = conv["content"]  # ¿ªÊ¼ĞÂµÄÄÚÈİ¶Î
+                else:
+                    current_summary += " " + conv["content"]
+
+            # ¶Ô×îºóÒ»¸ö¶ÎÂä½øĞĞ×Ü½á
+            if current_summary:
+                summary = self.service.ask_once(current_summary)
+                storage.append({"role": "system", "content": summary})
+            summarized_content = storage
+            
+                    # ¼ÆËãĞÂµÄ×Ü³¤¶È£¬¼ì²éÊÇ·ñÂú×ãÒªÇó
+        new_total_length = essential_length + sum(len(conv["content"]) for conv in summarized_content)
+        if new_total_length <= window_length :
+            # Èç¹ûÂú×ãÒªÇó£¬¸üĞÂ¶Ô»°ÁĞ±í
+            self.conversation_list = [self.conversation_list[0]] + [essential_conversations[0]] + summarized_content + [essential_conversations[1]]
+            return True
+        else:
+            print("[ÏµÍ³]: ¼´Ê¹¾­¹ı×Ü½á£¬ÊäÈë³¤¶ÈÈÔÈ»¹ı³¤¡£")
+            return False
+            
+    def process_input(self,input):
+        self.conversation_list.append({"role": "user", "content": input})
+            # ÔÚ·¢ËÍÇëÇóÖ®Ç°£¬È·±£±³¾°ĞÅÏ¢³¤¶È·ûºÏÒªÇó
+        if len(self.conversation_list) >= 2:  # µ±¶Ô»°ÁĞ±í³¬¹ı2Ìõ£¨°üÀ¨ÏµÍ³³õÊ¼»¯ĞÅÏ¢£©Ê±¿ªÊ¼¼ì²é³¤¶È
+            if not self.summarize_conversation():
+                return "[ÏµÍ³]: ÎŞ·¨¼ÌĞø´¦Àí£¬ÒòÎª¶Ô»°ÄÚÈİ¹ı³¤¡£"
+            
+        response = self.service.ask_once(input)
+        self.renew_conversation_info(response)
+        if len(self.conversation_list) == 3:
+            self.name_conversation()
+        
         return response

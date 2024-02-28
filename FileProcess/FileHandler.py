@@ -1,109 +1,109 @@
-import os
-import json
-import shutil
-import PyPDF2
-import markdown
-
-class FileProcessor:
-    def __init__(self, base_path: str = None) -> None:
-        """åˆå§‹åŒ–æ–‡ä»¶å¤„ç†å™¨"""
-        if base_path is None:
-            self.base_path = os.path.dirname(__file__)
-        else:
-            self.base_path = base_path
-
-    def get_full_path(self, relative_path: str) -> str:
-        """è·å–æ–‡ä»¶çš„å®Œæ•´è·¯å¾„"""
-        return os.path.join(self.base_path, relative_path)
-
-    def create_and_write_json(self, folder_path: str, filename: str, data: dict) -> None:
-        """åœ¨æŒ‡å®šæ–‡ä»¶å¤¹ä¸­åˆ›å»º JSON æ–‡ä»¶å¹¶å†™å…¥æ•°æ®"""
-        full_folder_path = self.get_full_path(folder_path)
-        full_file_path = os.path.join(full_folder_path, f"{filename}.json")
-
-        # å¦‚æœæ–‡ä»¶å¤¹è·¯å¾„ä¸å­˜åœ¨ï¼Œåˆ™åˆ›å»ºæ–‡ä»¶å¤¹
-        if not os.path.exists(full_folder_path):
-            os.makedirs(full_folder_path)
-
-        with open(full_file_path, 'w') as json_file:
-            json.dump(data, json_file, indent=4)
-        print(f"JSON æ–‡ä»¶ '{filename}.json' åœ¨æ–‡ä»¶å¤¹ '{folder_path}' ä¸­åˆ›å»ºå¹¶å†™å…¥æˆåŠŸ.")
-
-    def read_file(self, file_path: str) -> str:
-        """æ ¹æ®æ–‡ä»¶ç±»å‹é€‰æ‹©é€‚å½“çš„è¯»å–æ–¹æ³•"""
-        _, file_extension = os.path.splitext(file_path)
-        if file_extension.lower() in ['.txt', '.md']:
-            return self.read_text_file(file_path)
-        elif file_extension.lower() == '.json':
-            return self.read_json_file(file_path)
-        elif file_extension.lower() == '.pdf':
-            return self.read_pdf_file(file_path)
-        else:
-            raise ValueError(f"Unsupported file type: {file_extension}")
-
-    def read_text_file(self, file_path: str) -> str:
-        """è¯»å–æ–‡æœ¬æ–‡ä»¶"""
-        with open(self.get_full_path(file_path), 'r', encoding='utf-8') as file:
-            return file.read()
-
-    def read_json_file(self, file_path: str) -> dict:
-        """è¯»å–JSONæ–‡ä»¶"""
-        with open(self.get_full_path(file_path), 'r', encoding='utf-8') as file:
-            return json.load(file)
-
-    def read_pdf_file(self, file_path: str) -> str:
-        """è¯»å–PDFæ–‡ä»¶ï¼Œéœ€è¦ä½¿ç”¨å¤–éƒ¨åº“"""
-        try:
-            with open(file_path, 'rb') as file:
-                pdf_reader = PyPDF2.PdfReader(file)
-                text = ''
-                for page in pdf_reader.pages:
-                    text += page.extract_text()
-                return text
-        except FileNotFoundError:
-            return "æ–‡ä»¶æœªæ‰¾åˆ°ï¼Œè¯·æ£€æŸ¥æ–‡ä»¶è·¯å¾„ã€‚"
-        except PyPDF2.utils.PdfReadError:
-            return "æ— æ³•è¯»å–PDFæ–‡ä»¶ï¼Œè¯·ç¡®ä¿æ–‡ä»¶æ ¼å¼æ­£ç¡®ã€‚"
-
-    def write_file(self, file_path: str, content: str) -> None:
-        """å†™å…¥æ–‡ä»¶ï¼Œæ ¹æ®æ–‡ä»¶ç±»å‹é€‰æ‹©é€‚å½“çš„å†™å…¥æ–¹æ³•"""
-        _, file_extension = os.path.splitext(file_path)
-        if file_extension.lower() == '.json':
-            self.write_json_file(file_path, content)
-        elif file_extension.lower() == '.md':
-            self.write_text_file(file_path, content)
-        elif file_extension.lower() == '.pdf':
-            self.write_pdf_file(file_path, content)
-        else:
-            self.write_text_file(file_path, content)
-
-    def write_text_file(self, file_path: str, content: str) -> None:
-        """å†™å…¥æ–‡æœ¬æ–‡ä»¶"""
-        with open(self.get_full_path(file_path), 'w', encoding='utf-8') as file:
-            file.write(content)
-
-    def write_json_file(self, file_path: str, content: dict) -> None:
-        """å†™å…¥JSONæ–‡ä»¶"""
-        with open(self.get_full_path(file_path), 'w', encoding='utf-8') as file:
-            json.dump(content, file, ensure_ascii=False, indent=4)
-
-    def write_pdf_file(self, file_path: str, content: str) -> None:
-        """å†™å…¥PDFæ–‡ä»¶"""
-        pdf_writer = PyPDF2.PdfFileWriter()
-        pdf_writer.addPage(PyPDF2.PageObject.createTextPage(content))
-        with open(self.get_full_path(file_path), 'wb') as file:
-            pdf_writer.write(file)
-
-    def delete_file(self, file_path: str) -> None:
-        """åˆ é™¤æ–‡ä»¶"""
-        os.remove(self.get_full_path(file_path))
-
-    def move_file(self, source_path: str, destination_path: str) -> None:
-        """ç§»åŠ¨æ–‡ä»¶"""
-        shutil.move(self.get_full_path(source_path), self.get_full_path(destination_path))
-        
-    def parse_md_to_html(self, file_path):
-        """å°†Markdownæ–‡ä»¶è§£æä¸ºHTML"""
-        md_content = self.read_text_file(file_path)
-        html_content = markdown.markdown(md_content)
+import os
+import json
+import shutil
+import PyPDF2
+import markdown
+
+class FileProcessor:
+    def __init__(self, base_path: str = None) -> None:
+        """³õÊ¼»¯ÎÄ¼ş´¦ÀíÆ÷"""
+        if base_path is None:
+            self.base_path = os.path.dirname(__file__)
+        else:
+            self.base_path = base_path
+
+    def get_full_path(self, relative_path: str) -> str:
+        """»ñÈ¡ÎÄ¼şµÄÍêÕûÂ·¾¶"""
+        return os.path.join(self.base_path, relative_path)
+
+    def create_and_write_json(self, folder_path: str, filename: str, data: dict) -> None:
+        """ÔÚÖ¸¶¨ÎÄ¼ş¼ĞÖĞ´´½¨ JSON ÎÄ¼ş²¢Ğ´ÈëÊı¾İ"""
+        full_folder_path = self.get_full_path(folder_path)
+        full_file_path = os.path.join(full_folder_path, f"{filename}.json")
+
+        # Èç¹ûÎÄ¼ş¼ĞÂ·¾¶²»´æÔÚ£¬Ôò´´½¨ÎÄ¼ş¼Ğ
+        if not os.path.exists(full_folder_path):
+            os.makedirs(full_folder_path)
+
+        with open(full_file_path, 'w') as json_file:
+            json.dump(data, json_file, indent=4)
+        print(f"JSON ÎÄ¼ş '{filename}.json' ÔÚÎÄ¼ş¼Ğ '{folder_path}' ÖĞ´´½¨²¢Ğ´Èë³É¹¦.")
+
+    def read_file(self, file_path: str) -> str:
+        """¸ù¾İÎÄ¼şÀàĞÍÑ¡ÔñÊÊµ±µÄ¶ÁÈ¡·½·¨"""
+        _, file_extension = os.path.splitext(file_path)
+        if file_extension.lower() in ['.txt', '.md']:
+            return self.read_text_file(file_path)
+        elif file_extension.lower() == '.json':
+            return self.read_json_file(file_path)
+        elif file_extension.lower() == '.pdf':
+            return self.read_pdf_file(file_path)
+        else:
+            raise ValueError(f"Unsupported file type: {file_extension}")
+
+    def read_text_file(self, file_path: str) -> str:
+        """¶ÁÈ¡ÎÄ±¾ÎÄ¼ş"""
+        with open(self.get_full_path(file_path), 'r', encoding='utf-8') as file:
+            return file.read()
+
+    def read_json_file(self, file_path: str) -> dict:
+        """¶ÁÈ¡JSONÎÄ¼ş"""
+        with open(self.get_full_path(file_path), 'r', encoding='utf-8') as file:
+            return json.load(file)
+
+    def read_pdf_file(self, file_path: str) -> str:
+        """¶ÁÈ¡PDFÎÄ¼ş£¬ĞèÒªÊ¹ÓÃÍâ²¿¿â"""
+        try:
+            with open(file_path, 'rb') as file:
+                pdf_reader = PyPDF2.PdfReader(file)
+                text = ''
+                for page in pdf_reader.pages:
+                    text += page.extract_text()
+                return text
+        except FileNotFoundError:
+            return "ÎÄ¼şÎ´ÕÒµ½£¬Çë¼ì²éÎÄ¼şÂ·¾¶¡£"
+        except PyPDF2.utils.PdfReadError:
+            return "ÎŞ·¨¶ÁÈ¡PDFÎÄ¼ş£¬ÇëÈ·±£ÎÄ¼ş¸ñÊ½ÕıÈ·¡£"
+
+    def write_file(self, file_path: str, content: str) -> None:
+        """Ğ´ÈëÎÄ¼ş£¬¸ù¾İÎÄ¼şÀàĞÍÑ¡ÔñÊÊµ±µÄĞ´Èë·½·¨"""
+        _, file_extension = os.path.splitext(file_path)
+        if file_extension.lower() == '.json':
+            self.write_json_file(file_path, content)
+        elif file_extension.lower() == '.md':
+            self.write_text_file(file_path, content)
+        elif file_extension.lower() == '.pdf':
+            self.write_pdf_file(file_path, content)
+        else:
+            self.write_text_file(file_path, content)
+
+    def write_text_file(self, file_path: str, content: str) -> None:
+        """Ğ´ÈëÎÄ±¾ÎÄ¼ş"""
+        with open(self.get_full_path(file_path), 'w', encoding='utf-8') as file:
+            file.write(content)
+
+    def write_json_file(self, file_path: str, content: dict) -> None:
+        """Ğ´ÈëJSONÎÄ¼ş"""
+        with open(self.get_full_path(file_path), 'w', encoding='utf-8') as file:
+            json.dump(content, file, ensure_ascii=False, indent=4)
+
+    def write_pdf_file(self, file_path: str, content: str) -> None:
+        """Ğ´ÈëPDFÎÄ¼ş"""
+        pdf_writer = PyPDF2.PdfFileWriter()
+        pdf_writer.addPage(PyPDF2.PageObject.createTextPage(content))
+        with open(self.get_full_path(file_path), 'wb') as file:
+            pdf_writer.write(file)
+
+    def delete_file(self, file_path: str) -> None:
+        """É¾³ıÎÄ¼ş"""
+        os.remove(self.get_full_path(file_path))
+
+    def move_file(self, source_path: str, destination_path: str) -> None:
+        """ÒÆ¶¯ÎÄ¼ş"""
+        shutil.move(self.get_full_path(source_path), self.get_full_path(destination_path))
+        
+    def parse_md_to_html(self, file_path):
+        """½«MarkdownÎÄ¼ş½âÎöÎªHTML"""
+        md_content = self.read_text_file(file_path)
+        html_content = markdown.markdown(md_content)
         return html_content

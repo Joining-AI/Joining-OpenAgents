@@ -1,0 +1,1087 @@
+{
+  "Chat\\__init__.py": [],
+  "FileProcess\\__init__.py": [],
+  "LLM_API\\open_ai.py": [
+    {
+      "type": "ClassDef",
+      "name": "OpenAIService",
+      "md_content": [
+        "**OpenAIService**: OpenAIService的功能是初始化OpenAI服务并提供与OpenAI API的交互。\n\n**attributes**:\n- user_key: 用于存储OpenAI API密钥的字符串变量。\n- base_url: 用于存储OpenAI基础URL的字符串变量。\n- openai: 用于存储OpenAI模块的变量。\n- initialized: 用于标识服务是否已初始化的布尔变量。\n\n**Code Description**:\nOpenAIService类包含以下功能：\n- \\__init\\__方法：初始化OpenAIService对象，加载环境变量中的API密钥和基础URL，并调用init_service方法进行服务初始化。\n- init_service方法：根据传入的API密钥和基础URL初始化OpenAI服务。\n- ask_once方法：向OpenAI API发送请求并获取响应。\n\n在项目中，OpenAIService类被Tools\\use_tools.py/FunctionManager/__init__对象调用。在FunctionManager初始化过程中，根据service_type的取值选择性地创建了OpenAIService对象，用于处理OpenAI相关的服务请求。\n\n**Note**: \n- 在使用OpenAIService之前，确保已正确设置环境变量OPENAI_API和OPENAI_URL。\n- 在调用ask_once方法之前，必须先调用init_service方法初始化服务。\n\n**Output Example**:\n如果成功获取到OpenAI API的响应，则可能返回类似以下内容：\n\"这是OpenAI API的响应消息。\""
+      ],
+      "code_start_line": 5,
+      "code_end_line": 39,
+      "params": [],
+      "have_return": true,
+      "code_content": "class OpenAIService:\n    def __init__(self):\n        # 加载当前目录的.env文件\n        load_dotenv()\n\n        self.openai = None\n        self.initialized = False\n        # 从环境变量中导入API密钥和基础URL\n        self.user_key = os.getenv('OPENAI_API', None)\n        self.base_url = os.getenv('OPENAI_URL', None)\n        self.init_service(self.user_key, self.base_url)\n\n    def init_service(self, user_key: str, base_url: str) -> bool:\n        openai = importlib.import_module('openai')\n        self.openai = openai\n        self.openai.api_key = user_key\n        self.openai.api_base = base_url\n        self.initialized = True\n        return True\n\n    def ask_once(self, prompt: str) -> str:\n        if not self.initialized:\n            raise ValueError(\"服务未初始化，请先调用 init_service 方法初始化服务。\")\n        \n        if not self.openai:\n            raise ValueError(\"OpenAI 模块未正确导入，请检查安装。\")\n        response = self.openai.ChatCompletion.create(\n            model=\"gpt-3.5-turbo\",\n            messages=[{\"role\": \"user\", \"content\": prompt}]\n        )\n\n        if response and 'choices' in response and len(response['choices']) > 0:\n            return print(response['choices'][0]['message']['content'])\n        else:\n            return \"\"\n",
+      "name_column": 6,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "LLM_API\\__init__.py",
+        "Tools\\use_tools.py",
+        "Tools\\use_tools.py/FunctionManager/__init__"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "__init__",
+      "md_content": [
+        "**__init__**: __init__函数的作用是初始化OpenAIService对象。\n\n**参数**:\n· 无\n\n**代码描述**:\n__init__函数首先加载当前目录的.env文件。然后初始化了openai、initialized、user_key和base_url属性。接着从环境变量中获取API密钥和基础URL，并将它们作为参数传递给init_service函数，以初始化OpenAI服务。\n\n在__init__函数中，调用了init_service函数来完成OpenAI服务的初始化。init_service函数通过导入importlib模块来加载openai模块，将用户提供的API密钥和基础URL分别赋值给openai模块的api_key和api_base属性。最后将initialized属性设置为True，并返回True。\n\n**注意**: 在调用__init__函数之前，请确保已正确设置了环境变量OPENAI_API和OPENAI_URL。"
+      ],
+      "code_start_line": 6,
+      "code_end_line": 15,
+      "params": [
+        "self"
+      ],
+      "have_return": false,
+      "code_content": "    def __init__(self):\n        # 加载当前目录的.env文件\n        load_dotenv()\n\n        self.openai = None\n        self.initialized = False\n        # 从环境变量中导入API密钥和基础URL\n        self.user_key = os.getenv('OPENAI_API', None)\n        self.base_url = os.getenv('OPENAI_URL', None)\n        self.init_service(self.user_key, self.base_url)\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [
+        "LLM_API\\open_ai.py/OpenAIService/init_service"
+      ],
+      "special_reference_type": [
+        false
+      ]
+    },
+    {
+      "type": "FunctionDef",
+      "name": "init_service",
+      "md_content": [
+        "**init_service**: init_service函数的作用是初始化OpenAI服务。\n\n**参数**:\n· user_key: 用户密钥，字符串类型。\n· base_url: 基础URL，字符串类型。\n\n**代码描述**:\ninit_service函数通过导入importlib模块来加载openai模块。然后将用户提供的API密钥和基础URL分别赋值给openai模块的api_key和api_base属性。最后将initialized属性设置为True，并返回True。\n\n在项目中，init_service函数被LLM_API\\open_ai.py/OpenAIService/__init__对象调用。在__init__函数中，首先加载.env文件，然后初始化了openai、initialized、user_key和base_url属性。接着从环境变量中获取API密钥和基础URL，并将它们作为参数传递给init_service函数，以初始化OpenAI服务。\n\n**注意**: 请确保在调用init_service函数之前，已经正确设置了环境变量OPENAI_API和OPENAI_URL。\n\n**输出示例**:\nTrue"
+      ],
+      "code_start_line": 17,
+      "code_end_line": 23,
+      "params": [
+        "self",
+        "user_key",
+        "base_url"
+      ],
+      "have_return": true,
+      "code_content": "    def init_service(self, user_key: str, base_url: str) -> bool:\n        openai = importlib.import_module('openai')\n        self.openai = openai\n        self.openai.api_key = user_key\n        self.openai.api_base = base_url\n        self.initialized = True\n        return True\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "LLM_API\\open_ai.py/OpenAIService/__init__"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "ask_once",
+      "md_content": [
+        "**ask_once**: ask_once函数的功能是使用OpenAI服务向模型提供提示并获取响应。\n\n**参数**:\n· prompt: str - 表示用户提供的提示字符串。\n\n**代码描述**:\nask_once函数首先检查服务是否已初始化，若未初始化则引发ValueError异常。接着检查OpenAI模块是否正确导入，若未正确导入也会引发ValueError异常。然后，函数使用用户提供的提示字符串向OpenAI模型发送请求，并获取响应。最后，根据响应内容返回模型生成的文本或空字符串。\n\n在调用方的代码中，ask_once函数被用于为函数生成描述。如果函数已存在于已有描述中，则检查是否需要更新描述字段，其中包括描述信息。如果原描述为空，则尝试使用代码解析补充描述信息。如果有需要更新的字段，则更新函数信息。如果函数不存在于已有描述中，则将其视为新函数，同样使用ask_once函数来为新函数生成描述信息。\n\n**注意**: 在使用ask_once函数时，请确保已正确初始化服务并正确导入OpenAI模块。\n\n**输出示例**:\n假设模型生成了文本：\"这是一个示例描述\"，则函数返回值为：\"这是一个示例描述\"。"
+      ],
+      "code_start_line": 25,
+      "code_end_line": 39,
+      "params": [
+        "self",
+        "prompt"
+      ],
+      "have_return": true,
+      "code_content": "    def ask_once(self, prompt: str) -> str:\n        if not self.initialized:\n            raise ValueError(\"服务未初始化，请先调用 init_service 方法初始化服务。\")\n        \n        if not self.openai:\n            raise ValueError(\"OpenAI 模块未正确导入，请检查安装。\")\n        response = self.openai.ChatCompletion.create(\n            model=\"gpt-3.5-turbo\",\n            messages=[{\"role\": \"user\", \"content\": prompt}]\n        )\n\n        if response and 'choices' in response and len(response['choices']) > 0:\n            return print(response['choices'][0]['message']['content'])\n        else:\n            return \"\"\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "Tools\\use_tools.py/FunctionManager/compare_functions"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    }
+  ],
+  "LLM_API\\sense_time.py": [
+    {
+      "type": "ClassDef",
+      "name": "AuthenticatedRequestSender",
+      "md_content": [
+        "**AuthenticatedRequestSender**: AuthenticatedRequestSender的功能是处理身份验证并发送请求。\n\n**attributes**:\n- base_url: API的基础URL\n- ak: 从环境变量获取的AK\n- sk: 从环境变量获取的SK\n- authorization: 授权信息\n- refresh_interval: 刷新token的时间间隔\n- timer: 定时器\n- lock: 线程锁\n\n**Code Description**:\nAuthenticatedRequestSender类包含了处理身份验证并发送请求的方法。在初始化时，会设置基础URL、AK、SK等属性，并调用refresh_token方法刷新token。generate_jwt_token方法用于生成JWT token，refresh_token方法定时刷新token。send_get_request方法发送GET请求，ask_once方法发送POST请求并处理响应，embed方法发送POST请求并处理嵌入式响应。在对象销毁时，会取消定时器。\n\n在项目中，AuthenticatedRequestSender类被Tools模块中的FunctionManager类调用。FunctionManager根据服务类型选择使用AuthenticatedRequestSender类或其他服务类进行实例化，以处理不同的服务请求。\n\n**Note**: \n- 在使用AuthenticatedRequestSender类时，需要确保环境变量中设置了SENSETIME_AK和SENSETIME_SK。\n- 调用ask_once和embed方法时，可以处理身份验证失败的情况并进行重试。\n\n**Output Example**:\n```json\n{\n    \"message\": \"请求成功\"\n}\n```"
+      ],
+      "code_start_line": 9,
+      "code_end_line": 112,
+      "params": [],
+      "have_return": true,
+      "code_content": "class AuthenticatedRequestSender:\n    def __init__(self, refresh_interval=1700):\n        self.base_url = \"https://api.sensenova.cn/v1/llm\"\n        self.ak = os.getenv(\"SENSETIME_AK\", None)  # 从环境变量获取AK\n        self.sk = os.getenv(\"SENSETIME_SK\", None)   # 从环境变量获取SK\n        self.authorization = None\n        self.refresh_interval = refresh_interval\n        self.timer = None\n        self.lock = threading.Lock()\n        self.refresh_token()\n\n    def generate_jwt_token(self):\n        headers = {\"alg\": \"HS256\", \"typ\": \"JWT\"}\n        payload = {\"iss\": self.ak, \"exp\": int(time.time()) + 1800, \"nbf\": int(time.time()) - 5}\n        token = jwt.encode(payload, self.sk, algorithm=\"HS256\", headers=headers)\n        return token\n\n    def refresh_token(self):\n        with self.lock:\n            self.authorization = self.generate_jwt_token()\n            if self.timer:\n                self.timer.cancel()\n            self.timer = threading.Timer(self.refresh_interval, self.refresh_token)\n            self.timer.start()\n\n    def send_get_request(self):\n        url = \"https://api.sensenova.cn/v1/llm/models\"\n        headers = {\n            \"Authorization\": \"Bearer \" +self.authorization,\n            \"Content-Type\": \"application/json\"\n        }\n        \n        response = requests.get(url, headers=headers)\n        return print(response.json())\n\n    def ask_once(self,messages=None, know_ids=None, max_new_tokens=None, model='SenseChat', n=1, repetition_penalty=1.05, stream=False, temperature=0.8, top_p=0.7, user=None, knowledge_config=None, plugins=None, retry_count=0):\n        url = self.base_url+'/chat-completions'\n        headers = {\"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \"+self.authorization}\n        payload = {\n            \"max_new_tokens\": max_new_tokens if max_new_tokens is not None else 1024,\n            \"messages\":  [{\n                \"content\": messages,\n                \"role\": \"user\"\n            }],\n            \"model\": model,\n            \"n\": n,\n            \"repetition_penalty\": repetition_penalty,\n            \"stream\": stream,\n            \"temperature\": temperature,\n            \"top_p\": top_p,\n            'knowledge_config':{},\n            'plugins':{}\n        }\n\n        response = requests.post(url, headers=headers, data=json.dumps(payload))\n        response_data = response.json()\n\n        # 提取'message'字段的值\n        message = response_data['data']['choices'][0]['message']\n        if response.status_code == 200:\n            return message\n        elif response.status_code == 401:\n            if retry_count < 3:  # 允许最多重试3次\n                self.refresh_token()  # 刷新token\n                return self.send_request(know_ids, max_new_tokens, messages, model, n, repetition_penalty, stream, temperature, top_p, user, knowledge_config, plugins, retry_count + 1)\n            else:\n                # 超过重试次数，可以返回错误信息或抛出异常\n                return {\"error\": \"Authentication failed after 3 retries.\"}\n        else:\n            return response.status_code\n\n    def embed(self, input_text=None, model='nova-embedding-stable', retry_count=0):\n        url = self.base_url + \"/embeddings\"\n        headers = {\n            \"Content-Type\": \"application/json\",\n            \"Authorization\": \"Bearer \"+self.authorization\n        }\n        payload = {\n            \"model\": model,\n            \"input\": [input_text]\n        }\n\n        response = requests.post(url, headers=headers, data=json.dumps(payload))\n        if response.status_code == 200:\n            response_data = response.json()\n            embedding = {}\n            embeddings = response_data.get('embeddings', [])\n            if embeddings:\n                embedding = embeddings[0].get('embedding', {})\n            return embedding\n        elif response.status_code == 401:\n            if retry_count < 3:\n                self.refresh_token()  # 刷新token\n                return self.embeddings(model, input_text, retry_count + 1)\n            else:\n                return {\"error\": \"Authentication failed after 3 retries.\"}\n        else:\n            return {\"error\": f\"Request failed with status code {response.status_code}\"}\n\n\n    def __del__(self):\n        with self.lock:\n            if self.timer:\n                self.timer.cancel()",
+      "name_column": 6,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "LLM_API\\__init__.py",
+        "Tools\\use_tools.py",
+        "Tools\\use_tools.py/FunctionManager/__init__"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "__init__",
+      "md_content": [
+        "**__init__**: \\_\\_init\\_\\_函数的功能是初始化AuthenticatedRequestSender类的实例。\n\n**参数**:\n· refresh_interval: 刷新间隔时间，默认值为1700。\n\n**代码描述**:\n\\_\\_init\\_\\_函数用于初始化AuthenticatedRequestSender类的实例。在函数内部，它设置了base_url为\"https://api.sensenova.cn/v1/llm\"，并从环境变量中获取SENSETIME_AK和SENSETIME_SK作为ak和sk参数。此外，它初始化了authorization为None，refresh_interval为传入的refresh_interval参数值，timer和lock为None和threading.Lock()的实例。最后，它调用refresh_token函数来刷新JWT令牌。\n\n在项目中，\\_\\_init\\_\\_函数是AuthenticatedRequestSender类的构造函数，用于初始化类的实例并设置必要的属性。它确保在创建AuthenticatedRequestSender实例时，相关的属性和参数已经设置好，以便后续的请求和操作能够顺利进行。\n\n**注意**:\n在使用\\_\\_init\\_\\_函数时，可以通过传入refresh_interval参数来设置JWT令牌的刷新间隔时间。确保在实例化AuthenticatedRequestSender类时，已经设置了正确的环境变量SENSETIME_AK和SENSETIME_SK，以便成功获取AK和SK参数。\n\nrefresh_token函数被\\_\\_init\\_\\_函数调用，用于在初始化AuthenticatedRequestSender实例时立即刷新JWT令牌，以确保实例化后即可使用有效的令牌进行请求。"
+      ],
+      "code_start_line": 10,
+      "code_end_line": 18,
+      "params": [
+        "self",
+        "refresh_interval"
+      ],
+      "have_return": false,
+      "code_content": "    def __init__(self, refresh_interval=1700):\n        self.base_url = \"https://api.sensenova.cn/v1/llm\"\n        self.ak = os.getenv(\"SENSETIME_AK\", None)  # 从环境变量获取AK\n        self.sk = os.getenv(\"SENSETIME_SK\", None)   # 从环境变量获取SK\n        self.authorization = None\n        self.refresh_interval = refresh_interval\n        self.timer = None\n        self.lock = threading.Lock()\n        self.refresh_token()\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [
+        "LLM_API\\sense_time.py/AuthenticatedRequestSender/refresh_token"
+      ],
+      "special_reference_type": [
+        false
+      ]
+    },
+    {
+      "type": "FunctionDef",
+      "name": "generate_jwt_token",
+      "md_content": [
+        "**generate_jwt_token**: generate_jwt_token函数的功能是生成JWT令牌。\n\n**参数**：此函数无参数。\n\n**代码描述**：generate_jwt_token函数首先创建了headers和payload两个字典，分别用于指定JWT的头部和载荷内容。其中，头部包含了算法和类型信息，载荷包含了签发者、过期时间和生效时间等信息。接着，利用jwt库的encode方法生成JWT令牌，使用指定的算法和密钥对载荷进行加密。最后，返回生成的JWT令牌。\n\n在项目中，generate_jwt_token函数被AuthenticatedRequestSender类中的refresh_token函数调用。refresh_token函数在获取新的JWT令牌前会调用generate_jwt_token函数生成新的令牌，并在一定时间间隔后再次调用refresh_token函数以更新JWT令牌。\n\n**注意**：在使用generate_jwt_token函数时，确保提供正确的ak和sk参数以生成有效的JWT令牌。\n\n**输出示例**：示例JWT令牌：eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhZG1pbiIsImV4cCI6MTYyMzUwNzY4MCwibmJmIjoxNjIzNTA3NjYxfQ.5r5y4v9e4J8G1K7y0KvK8Rb2z4v8J7e4v8J7e4v8J7e"
+      ],
+      "code_start_line": 20,
+      "code_end_line": 24,
+      "params": [
+        "self"
+      ],
+      "have_return": true,
+      "code_content": "    def generate_jwt_token(self):\n        headers = {\"alg\": \"HS256\", \"typ\": \"JWT\"}\n        payload = {\"iss\": self.ak, \"exp\": int(time.time()) + 1800, \"nbf\": int(time.time()) - 5}\n        token = jwt.encode(payload, self.sk, algorithm=\"HS256\", headers=headers)\n        return token\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "LLM_API\\sense_time.py/AuthenticatedRequestSender/refresh_token"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "refresh_token",
+      "md_content": [
+        "**refresh_token**: refresh_token函数的功能是刷新JWT令牌。\n\n**参数**：此函数无参数。\n\n**代码描述**：refresh_token函数通过获取新的JWT令牌来刷新现有的令牌。在函数内部，它首先使用线程锁确保安全地生成新的JWT令牌，然后取消之前的定时器（如果存在），创建一个新的定时器以在指定的刷新间隔后再次调用refresh_token函数。最后，启动新的定时器以开始刷新JWT令牌的过程。\n\n在项目中，refresh_token函数被AuthenticatedRequestSender类中的其他函数调用，以确保在需要时始终具有有效的JWT令牌。\n\n**注意**：在使用refresh_token函数时，确保已正确初始化ak和sk参数，并了解刷新间隔的设置以便及时更新JWT令牌。\n\n**输出示例**：无。"
+      ],
+      "code_start_line": 26,
+      "code_end_line": 32,
+      "params": [
+        "self"
+      ],
+      "have_return": false,
+      "code_content": "    def refresh_token(self):\n        with self.lock:\n            self.authorization = self.generate_jwt_token()\n            if self.timer:\n                self.timer.cancel()\n            self.timer = threading.Timer(self.refresh_interval, self.refresh_token)\n            self.timer.start()\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "LLM_API\\sense_time.py/AuthenticatedRequestSender/__init__",
+        "LLM_API\\sense_time.py/AuthenticatedRequestSender/ask_once",
+        "LLM_API\\sense_time.py/AuthenticatedRequestSender/embed"
+      ],
+      "reference_who": [
+        "LLM_API\\sense_time.py/AuthenticatedRequestSender/generate_jwt_token"
+      ],
+      "special_reference_type": [
+        false
+      ]
+    },
+    {
+      "type": "FunctionDef",
+      "name": "send_get_request",
+      "md_content": [
+        "**send_get_request**: send_get_request函数的功能是向指定的URL发送GET请求并返回响应结果。\n\n**参数**:\n· 无参数\n\n**代码描述**:\n该函数首先构建了一个指向\"https://api.sensenova.cn/v1/llm/models\"的URL，并设置了包含Authorization和Content-Type的headers。然后，使用requests库发送GET请求到指定的URL，并携带headers。最后，将获取到的响应结果以JSON格式打印输出。\n\n**注意**:\n在使用该函数之前，确保已经设置了self.authorization的值，以便在headers中正确添加Authorization信息。\n\n**输出示例**:\n{\n    \"key1\": \"value1\",\n    \"key2\": \"value2\",\n    ...\n}"
+      ],
+      "code_start_line": 34,
+      "code_end_line": 42,
+      "params": [
+        "self"
+      ],
+      "have_return": true,
+      "code_content": "    def send_get_request(self):\n        url = \"https://api.sensenova.cn/v1/llm/models\"\n        headers = {\n            \"Authorization\": \"Bearer \" +self.authorization,\n            \"Content-Type\": \"application/json\"\n        }\n        \n        response = requests.get(url, headers=headers)\n        return print(response.json())\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "ask_once",
+      "md_content": [
+        "**ask_once**: ask_once函数的功能是向服务器发送一次请求以获取聊天完成的消息。\n\n**参数**:\n- messages: 要发送的消息内容。\n- know_ids: 知识库的ID。\n- max_new_tokens: 生成消息的最大标记数。\n- model: 使用的模型名称。\n- n: 生成的消息数量。\n- repetition_penalty: 重复惩罚值。\n- stream: 是否流式传输。\n- temperature: 温度值。\n- top_p: 顶部p值。\n- user: 用户信息。\n- knowledge_config: 知识配置。\n- plugins: 插件信息。\n- retry_count: 重试次数。\n\n**代码描述**:\nask_once函数通过构建请求payload并向服务器发送POST请求来获取聊天完成的消息。在函数内部，首先构建请求的URL和headers，然后构建请求的payload数据。接着，使用requests库向服务器发送POST请求，并解析响应数据以获取消息内容。如果响应状态码为200，则返回消息内容；如果状态码为401，则根据重试次数判断是否刷新token并重新发送请求；其他状态码则直接返回状态码。\n\n**注意**:\n在使用ask_once函数时，确保传入必要的参数以正确发送请求并处理响应。\n如果遇到401状态码，函数会尝试最多3次刷新token并重新发送请求。\n了解各参数的含义和取值范围，以便正确配置请求。\n\n**输出示例**:\n{\"message\": \"这是一个聊天完成的消息内容。\"}"
+      ],
+      "code_start_line": 44,
+      "code_end_line": 78,
+      "params": [
+        "self",
+        "messages",
+        "know_ids",
+        "max_new_tokens",
+        "model",
+        "n",
+        "repetition_penalty",
+        "stream",
+        "temperature",
+        "top_p",
+        "user",
+        "knowledge_config",
+        "plugins",
+        "retry_count"
+      ],
+      "have_return": true,
+      "code_content": "    def ask_once(self,messages=None, know_ids=None, max_new_tokens=None, model='SenseChat', n=1, repetition_penalty=1.05, stream=False, temperature=0.8, top_p=0.7, user=None, knowledge_config=None, plugins=None, retry_count=0):\n        url = self.base_url+'/chat-completions'\n        headers = {\"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \"+self.authorization}\n        payload = {\n            \"max_new_tokens\": max_new_tokens if max_new_tokens is not None else 1024,\n            \"messages\":  [{\n                \"content\": messages,\n                \"role\": \"user\"\n            }],\n            \"model\": model,\n            \"n\": n,\n            \"repetition_penalty\": repetition_penalty,\n            \"stream\": stream,\n            \"temperature\": temperature,\n            \"top_p\": top_p,\n            'knowledge_config':{},\n            'plugins':{}\n        }\n\n        response = requests.post(url, headers=headers, data=json.dumps(payload))\n        response_data = response.json()\n\n        # 提取'message'字段的值\n        message = response_data['data']['choices'][0]['message']\n        if response.status_code == 200:\n            return message\n        elif response.status_code == 401:\n            if retry_count < 3:  # 允许最多重试3次\n                self.refresh_token()  # 刷新token\n                return self.send_request(know_ids, max_new_tokens, messages, model, n, repetition_penalty, stream, temperature, top_p, user, knowledge_config, plugins, retry_count + 1)\n            else:\n                # 超过重试次数，可以返回错误信息或抛出异常\n                return {\"error\": \"Authentication failed after 3 retries.\"}\n        else:\n            return response.status_code\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "Tools\\use_tools.py/FunctionManager/compare_functions"
+      ],
+      "reference_who": [
+        "LLM_API\\sense_time.py/AuthenticatedRequestSender/refresh_token"
+      ],
+      "special_reference_type": [
+        false
+      ]
+    },
+    {
+      "type": "FunctionDef",
+      "name": "embed",
+      "md_content": [
+        "**embed**: embed函数的功能是将输入文本嵌入到指定的模型中，并返回嵌入结果。\n\n**参数**:\n· input_text: 输入的文本内容，默认为None。\n· model: 指定的嵌入模型，默认为'nova-embedding-stable'。\n· retry_count: 重试次数，默认为0。\n\n**代码描述**:\nembed函数首先构建请求的URL和headers，然后将输入文本和模型信息作为payload发送POST请求。根据响应的状态码进行不同的处理：若状态码为200，则解析响应数据并返回第一个嵌入结果；若状态码为401，则尝试刷新令牌并重新调用embed函数，最多重试3次；其他状态码则返回相应的错误信息。\n\n在功能上，embed函数依赖于refresh_token函数来确保在需要时刷新JWT令牌，以维持有效的身份验证状态。\n\n**注意**:\n在使用embed函数前，请确保已正确初始化base_url和authorization参数。\n若遇到身份验证失败的情况，函数会尝试最多3次刷新令牌。\n根据实际情况，可根据业务需求调整模型参数。\n\n**输出示例**:\n{\"embedding\": [0.1, 0.2, ..., 0.9]}"
+      ],
+      "code_start_line": 80,
+      "code_end_line": 106,
+      "params": [
+        "self",
+        "input_text",
+        "model",
+        "retry_count"
+      ],
+      "have_return": true,
+      "code_content": "    def embed(self, input_text=None, model='nova-embedding-stable', retry_count=0):\n        url = self.base_url + \"/embeddings\"\n        headers = {\n            \"Content-Type\": \"application/json\",\n            \"Authorization\": \"Bearer \"+self.authorization\n        }\n        payload = {\n            \"model\": model,\n            \"input\": [input_text]\n        }\n\n        response = requests.post(url, headers=headers, data=json.dumps(payload))\n        if response.status_code == 200:\n            response_data = response.json()\n            embedding = {}\n            embeddings = response_data.get('embeddings', [])\n            if embeddings:\n                embedding = embeddings[0].get('embedding', {})\n            return embedding\n        elif response.status_code == 401:\n            if retry_count < 3:\n                self.refresh_token()  # 刷新token\n                return self.embeddings(model, input_text, retry_count + 1)\n            else:\n                return {\"error\": \"Authentication failed after 3 retries.\"}\n        else:\n            return {\"error\": f\"Request failed with status code {response.status_code}\"}\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [
+        "LLM_API\\sense_time.py/AuthenticatedRequestSender/refresh_token"
+      ],
+      "special_reference_type": [
+        false
+      ]
+    },
+    {
+      "type": "FunctionDef",
+      "name": "__del__",
+      "md_content": [
+        "**__del__**: __del__函数的功能是取消计时器。\n\n**参数**:\n· self: 表示类的实例本身。\n\n**代码描述**:\n在__del__函数中，首先使用了self.lock来确保线程安全。然后检查self.timer是否存在，如果存在则调用cancel()方法来取消计时器。\n\n**注意**:\n在Python中，__del__方法是一个特殊方法，用于在对象被销毁时执行清理操作。在这里，__del__方法用于取消计时器，确保资源的正确释放。"
+      ],
+      "code_start_line": 109,
+      "code_end_line": 112,
+      "params": [
+        "self"
+      ],
+      "have_return": false,
+      "code_content": "    def __del__(self):\n        with self.lock:\n            if self.timer:\n                self.timer.cancel()",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    }
+  ],
+  "LLM_API\\__init__.py": [],
+  "Memory\\embeddings.py": [
+    {
+      "type": "ClassDef",
+      "name": "Embedding",
+      "md_content": [
+        "**Embedding**: Embedding的功能是计算文本嵌入向量之间的余弦相似度，并找到与目标消息最相似的消息及其相似度。\n\n**attributes**:\n- embedding1: 第一个文本嵌入向量\n- embedding2: 第二个文本嵌入向量\n- target_message: 目标消息\n- data: 包含消息和对应嵌入向量的数据列表\n- top_n: 返回的最相似消息数量，默认为5\n\n**Code Description**:\nEmbedding类包含两个静态方法。calculate_cosine_similarity方法用于计算两个文本嵌入向量之间的余弦相似度。find_top_similar_messages方法用于找到与目标消息最相似的top_n个消息及其相似度。在find_top_similar_messages方法中，首先获取目标消息的嵌入向量，然后计算目标消息与其他消息的相似度，最后根据相似度排序并返回top_n个最相似的消息及其相似度。\n\n在项目中，Embedding类被用于处理文本数据，通过计算余弦相似度来寻找与目标消息最相似的消息。这有助于在文本数据中进行相似性分析和推荐相关消息。\n\n**Note**:\n- 确保传入的数据格式正确，包含所需的消息和对应的嵌入向量。\n- 在调用find_top_similar_messages方法时，确保目标消息在数据中存在，否则会引发ValueError异常。\n\n**Output Example**:\n[('相似消息1', 0.85), ('相似消息2', 0.78), ('相似消息3', 0.72), ('相似消息4', 0.68), ('相似消息5', 0.61)]"
+      ],
+      "code_start_line": 5,
+      "code_end_line": 35,
+      "params": [],
+      "have_return": true,
+      "code_content": "class Embedding:\n    def __init__(self):\n        pass\n\n    @staticmethod\n    def calculate_cosine_similarity(embedding1: List[float], embedding2: List[float]) -> float:\n        \"\"\"计算余弦相似度\"\"\"\n        return 1 - cosine(embedding1, embedding2)\n\n    @staticmethod\n    def find_top_similar_messages(target_message: str, data: List[dict], top_n: int = 5) -> List[Tuple[str, float]]:\n        \"\"\"找到与目标消息最相似的top_n个消息及其相似度\"\"\"\n        similarities = []  # 存储相似度及对应的消息\n        target_embedding = None  # 目标消息的嵌入向量\n        # 获取目标消息的嵌入向量\n        for entry in data:\n            if entry.get('message') == target_message:\n                target_embedding = entry.get('embedding')\n                break\n        if target_embedding is None:\n            raise ValueError(\"Target message not found in the data.\")\n\n        # 计算目标消息与其他消息的相似度\n        for entry in data:\n            if entry.get('message') != target_message and 'embedding' in entry:\n                similarity = Embedding.calculate_cosine_similarity(target_embedding, entry['embedding'])\n                similarities.append((entry.get('message'), similarity))\n\n        # 根据相似度排序，并返回top_n个最相似的消息及其相似度\n        sorted_similarities = sorted(similarities, key=lambda x: x[1], reverse=True)\n        return sorted_similarities[:top_n]",
+      "name_column": 6,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "Memory\\__init__.py"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "__init__",
+      "md_content": [
+        "**__init__**: __init__的功能是初始化对象。\n\n**参数**：这个函数没有参数。\n\n**代码描述**：这个函数是一个构造函数，用于初始化对象。在这个特定的例子中，函数体内没有具体的操作，只有一个占位符pass语句。在实际应用中，可以在这个函数中进行对象的属性初始化或其他必要的操作。\n\n**注意**：在编写类时，__init__函数是一个特殊的函数，用于在创建对象时进行初始化操作。通常情况下，我们会在这个函数中设置对象的初始状态，以确保对象在创建后处于正确的状态。"
+      ],
+      "code_start_line": 6,
+      "code_end_line": 7,
+      "params": [
+        "self"
+      ],
+      "have_return": false,
+      "code_content": "    def __init__(self):\n        pass\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "calculate_cosine_similarity",
+      "md_content": [
+        "**calculate_cosine_similarity**: calculate_cosine_similarity函数的作用是计算余弦相似度。\n\n**参数**:\n· embedding1: 第一个嵌入向量，类型为List[float]。\n· embedding2: 第二个嵌入向量，类型为List[float]。\n\n**代码描述**:\ncalculate_cosine_similarity函数实现了计算两个嵌入向量之间的余弦相似度。函数内部调用了名为cosine的函数，通过计算1减去两个嵌入向量的余弦值来得到余弦相似度。\n\n在项目中，calculate_cosine_similarity函数被find_top_similar_messages函数调用。find_top_similar_messages函数的作用是找到与目标消息最相似的top_n个消息及其相似度。在该函数中，首先获取目标消息的嵌入向量，然后通过调用calculate_cosine_similarity函数计算目标消息与其他消息的相似度，最终返回相似度排名前top_n的消息及其相似度。\n\n**注意**: 在使用calculate_cosine_similarity函数时，需要传入两个嵌入向量作为参数，并且这两个向量需要是浮点数列表。函数返回一个浮点数，代表计算得到的余弦相似度。\n\n**输出示例**:\n0.85"
+      ],
+      "code_start_line": 10,
+      "code_end_line": 12,
+      "params": [
+        "embedding1",
+        "embedding2"
+      ],
+      "have_return": true,
+      "code_content": "    def calculate_cosine_similarity(embedding1: List[float], embedding2: List[float]) -> float:\n        \"\"\"计算余弦相似度\"\"\"\n        return 1 - cosine(embedding1, embedding2)\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "Memory\\embeddings.py/Embedding/find_top_similar_messages"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "find_top_similar_messages",
+      "md_content": [
+        "**find_top_similar_messages**: find_top_similar_messages函数的作用是找到与目标消息最相似的top_n个消息及其相似度。\n\n**参数**:\n· target_message: 目标消息，类型为str。\n· data: 包含消息和嵌入向量的数据列表，类型为List[dict]。\n· top_n: 返回相似度排名前top_n的消息数量，默认为5，类型为int。\n\n**代码描述**:\nfind_top_similar_messages函数首先在给定的数据列表中查找目标消息的嵌入向量，然后计算目标消息与其他消息的相似度。相似度通过调用Embedding.calculate_cosine_similarity函数计算得出，最终返回相似度排名前top_n的消息及其相似度。\n\n在项目中，find_top_similar_messages函数与calculate_cosine_similarity函数相关联。calculate_cosine_similarity函数用于计算两个嵌入向量之间的余弦相似度，而find_top_similar_messages函数则利用该相似度找到最相似的消息。\n\n**注意**: 在使用find_top_similar_messages函数时，需要传入目标消息、数据列表以及top_n参数。数据列表中的每个元素应包含'message'和'embedding'字段，且embedding字段为嵌入向量。\n\n**输出示例**:\n[('相似消息1', 0.85), ('相似消息2', 0.82), ('相似消息3', 0.78), ('相似消息4', 0.75), ('相似消息5', 0.72)]"
+      ],
+      "code_start_line": 15,
+      "code_end_line": 35,
+      "params": [
+        "target_message",
+        "data",
+        "top_n"
+      ],
+      "have_return": true,
+      "code_content": "    def find_top_similar_messages(target_message: str, data: List[dict], top_n: int = 5) -> List[Tuple[str, float]]:\n        \"\"\"找到与目标消息最相似的top_n个消息及其相似度\"\"\"\n        similarities = []  # 存储相似度及对应的消息\n        target_embedding = None  # 目标消息的嵌入向量\n        # 获取目标消息的嵌入向量\n        for entry in data:\n            if entry.get('message') == target_message:\n                target_embedding = entry.get('embedding')\n                break\n        if target_embedding is None:\n            raise ValueError(\"Target message not found in the data.\")\n\n        # 计算目标消息与其他消息的相似度\n        for entry in data:\n            if entry.get('message') != target_message and 'embedding' in entry:\n                similarity = Embedding.calculate_cosine_similarity(target_embedding, entry['embedding'])\n                similarities.append((entry.get('message'), similarity))\n\n        # 根据相似度排序，并返回top_n个最相似的消息及其相似度\n        sorted_similarities = sorted(similarities, key=lambda x: x[1], reverse=True)\n        return sorted_similarities[:top_n]",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [
+        "Memory\\embeddings.py/Embedding/calculate_cosine_similarity"
+      ],
+      "special_reference_type": [
+        false
+      ]
+    }
+  ],
+  "Memory\\__init__.py": [],
+  "Tools\\tools.py": [
+    {
+      "type": "FunctionDef",
+      "name": "sum",
+      "md_content": [
+        "**sum**: sum函数的功能是计算两个数的和。\n\n**参数**:\n· a: 第一个加数\n· b: 第二个加数\n\n**代码描述**:\n该函数接受两个参数a和b，然后返回它们的和。\n\n**注意**:\n无\n\n**输出示例**:\n如果调用sum(3, 5)，将返回结果8。"
+      ],
+      "code_start_line": 1,
+      "code_end_line": 2,
+      "params": [
+        "a",
+        "b"
+      ],
+      "have_return": true,
+      "code_content": "def sum(a,b):\n    return a+b\n",
+      "name_column": 4,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "prime_fib_sum",
+      "md_content": [
+        "**prime_fib_sum**: prime_fib_sum函数的功能是计算前n个质数和前n个斐波那契数的总和。\n**parameters**:\n· n: 一个整数，表示要计算的质数和斐波那契数的数量。\n**Code Description**:\n该函数首先定义了一个内部函数is_prime(num)，用于判断一个数是否为质数。然后，函数通过循环计算前n个质数的总和sum_primes，以及前n个斐波那契数的总和sum_fibs。最后返回两者之和作为结果。\n\n**Note**:\n- 如果输入的n小于等于0，则返回值为0。\n- 质数是大于1且只能被1和自身整除的数。\n- 斐波那契数列中，第一个数为0，第二个数为1，后续每个数都是前两个数之和。\n\n**Output Example**:\n如果输入n为5，则函数返回值为24。"
+      ],
+      "code_start_line": 4,
+      "code_end_line": 30,
+      "params": [
+        "n"
+      ],
+      "have_return": true,
+      "code_content": "def prime_fib_sum(n):\n    def is_prime(num):\n        if num <= 1:\n            return False\n        for i in range(2, int(num**0.5) + 1):\n            if num % i == 0:\n                return False\n        return True\n\n    count, num, sum_primes = 0, 2, 0\n    while count < n:\n        if is_prime(num):\n            sum_primes += num\n            count += 1\n        num += 1\n\n    if n <= 0:\n        sum_fibs = 0\n    else:\n        fib1, fib2 = 0, 1\n        sum_fibs = fib1 + fib2\n        for _ in range(2, n):\n            fib_next = fib1 + fib2\n            sum_fibs += fib_next\n            fib1, fib2 = fib2, fib_next\n\n    return sum_primes + sum_fibs\n",
+      "name_column": 4,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "is_prime",
+      "md_content": [
+        "**is_prime**: is_prime函数的功能是检查一个数是否为质数。\n\n**参数**:\n· num: 待检查的整数\n\n**代码描述**:\nis_prime函数接受一个整数作为参数，首先检查这个数是否小于等于1，如果是则返回False。然后通过一个循环从2开始到这个数的平方根加1的范围内，依次判断这个数能否被循环变量整除，如果能整除则返回False，表示这个数不是质数。如果循环结束后都没有能整除的情况出现，则返回True，表示这个数是质数。\n\n**注意**: 在使用该函数时，需要注意传入的参数应为整数。\n\n**输出示例**:\n对于输入的num为5，函数返回True。"
+      ],
+      "code_start_line": 5,
+      "code_end_line": 11,
+      "params": [
+        "num"
+      ],
+      "have_return": true,
+      "code_content": "    def is_prime(num):\n        if num <= 1:\n            return False\n        for i in range(2, int(num**0.5) + 1):\n            if num % i == 0:\n                return False\n        return True\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    }
+  ],
+  "Tools\\use_tools.py": [
+    {
+      "type": "ClassDef",
+      "name": "FunctionManager",
+      "md_content": [
+        "**FunctionManager**: FunctionManager的功能是管理函数信息和代码的更新。\n\n**attributes**:\n· project_root: 项目根目录的路径，str类型。\n· service_type: 服务类型，用于选择不同的服务对象。\n\n**Code Description**:\nFunctionManager类包含了初始化函数、加载函数信息、加载工具代码、更新函数信息、保存函数信息、解析代码中的函数、获取返回表达式、获取函数源代码、比较函数以及更新函数信息的功能。在初始化时，根据service_type的不同选择不同的服务对象。load_functions_info函数用于加载函数信息，load_tools_code函数用于加载工具代码。update_functions_info函数用于更新函数信息，parse_functions_from_code函数用于解析代码中的函数并返回独立的函数信息。get_return_expression函数用于获取函数的返回表达式，get_function_source_code函数用于从原始代码中提取函数的源代码。compare_functions函数用于比较函数信息并返回新函数和更新的函数列表。update_functions_info函数用于更新函数信息并保存到文件中。update_func_json函数用于更新函数信息的JSON文件。\n\n**Note**: 在使用FunctionManager类时，需要确保传入正确的project_root和service_type参数，以便正确初始化对象并执行相应的功能。\n\n**Output Example**:\n新函数列表: \n[{\"name\": \"function_name\", \"description\": \"函数描述\", \"input\": [\"param1\", \"param2\"], \"output\": \"return_expr\", \"file_path\": \"Tools/tools.py\", \"dependencies\": []}]\n更新的函数列表: \n[{\"name\": \"function_name\", \"description\": \"更新后的函数描述\", \"input\": [\"param1\", \"param2\"], \"output\": \"return_expr\", \"file_path\": \"Tools/tools.py\", \"dependencies\": []}]"
+      ],
+      "code_start_line": 7,
+      "code_end_line": 126,
+      "params": [],
+      "have_return": true,
+      "code_content": "class FunctionManager:\n    def __init__(self, project_root: str, service_type):\n        self.project_root = project_root\n        self.functions_info_path = os.path.join(project_root, \"Tools\", \"functions_info.json\")\n        self.functions_info = self.load_functions_info()    #dict\n        self.tools_path = os.path.join(project_root, \"Tools\", \"tools.py\")\n        self.tools_code = self.load_tools_code()            #str\n        self.save_path = os.path.join(\"Tools\", \"tools.py\")\n        self.processor = CodeAnalyser()\n        if service_type in ['sensetime', None]:\n            self.service = AuthenticatedRequestSender()\n        elif service_type == 'openai':\n            self.service = OpenAIService()\n        else:\n            raise ValueError('未知的服务类型')\n    \n    def load_functions_info(self):\n        if os.path.exists(self.functions_info_path):\n            with open(self.functions_info_path, 'r') as file:\n                return json.load(file)\n        else:\n            return {\"functions\": []}\n        \n    def load_tools_code(self):\n        with open(self.tools_path, 'r') as file:\n            return file.read()\n        \n    def update_functions_info(self, function_name, function_code):\n        self.functions_info[\"functions\"].append({\"name\": function_name, \"code\": function_code})\n\n    def save_functions_info(self):\n        with open(self.functions_info_path, 'w') as file:\n            json.dump(self.functions_info, file, indent=4)\n\n    def parse_functions_from_code(self):\n        tree = ast.parse(self.tools_code)\n        functions_and_classes = self.processor.get_functions_and_classes(self.tools_code)\n\n        # 获取所有没有父节点的函数，将其视为独立的方法\n        standalone_functions = []\n        for node_type, name, start_line, end_line, parent_name, parameters in functions_and_classes:\n            if parent_name is None:\n                # 获取函数源代码\n                source_code = self.get_function_source_code(name, start_line, end_line)\n                \n                # 解析函数\n                function_node = ast.parse(source_code).body[0]\n                return_expr = self.get_return_expression(function_node)\n\n                standalone_functions.append((node_type, name, start_line, end_line, None, parameters, source_code, return_expr))\n\n        return standalone_functions\n\n    def get_return_expression(self, function_node):\n        for node in ast.walk(function_node):\n            if isinstance(node, ast.Return):\n                if node.value:\n                    return ast.dump(node.value)\n                else:\n                    return None\n        return None\n\n\n    def get_function_source_code(self, name, start_line, end_line):\n        # 从原始代码中提取函数的源代码\n        lines = self.tools_code.split('\\n')\n        source_lines = lines[start_line - 1:end_line]\n        source_code = '\\n'.join(source_lines)\n        return source_code\n\n    def compare_functions(self, parsed_functions):\n        existing_functions = {func['name']: func for func in self.functions_info['functions']}\n        new_functions = []\n        updated_functions = []\n\n        for node_type, name, start_line, end_line, parent_name, parameters, source_code, return_expr in parsed_functions:\n            if name in existing_functions:\n                existing_func = existing_functions[name]\n                # 检查是否有需要更新的描述字段\n                updated_fields = {}\n                if existing_func.get('description') is None:\n                    # 如果原描述为空，尝试用代码解析补充\n                    update_description=self.service.ask_once(f\"please return a description for the function '{name}', of the following content:'{source_code}' focusing on its use, don't return any other irrelevant information.\")\n                    updated_fields['description'] = update_description\n                # 其他字段的更新逻辑，比如输入参数、输出参数、依赖项等\n\n                # 如果有需要更新的字段，更新函数信息\n                if updated_fields:\n                    existing_func.update(updated_fields)\n                    updated_functions.append(existing_func)\n            else:\n                # 如果函数不存在于已有描述中，视为新函数\n                update_description=self.service.ask_once(f\"please return a description for the function '{name}', of the following content:'{source_code}' focusing on its use, don't return any other irrelevant information.\")\n                new_functions.append({\n                    \"name\": name,\n                    \"description\": update_description,\n                    \"input\": parameters,  # 这里将参数作为输入\n                    \"output\": return_expr,  # 输出字段为空，您可以自行补充\n                    \"file_path\": self.save_path,  # 统一的文件路径\n                    \"dependencies\": []  # 暂时将依赖项设置为空列表\n                })\n\n        return new_functions, updated_functions\n\n    def update_functions_info(self, new_functions, updated_functions):\n        # 将新函数添加到 functions_info 中\n        self.functions_info['functions'].extend(new_functions)\n        # 更新已有函数的信息\n        for func in updated_functions:\n            for i, existing_func in enumerate(self.functions_info['functions']):\n                if existing_func['name'] == func['name']:\n                    self.functions_info['functions'][i] = func\n\n        # 保存更新后的信息到文件\n        self.save_functions_info()\n        \n    def update_func_json(self):\n        parsed_functions = self.parse_functions_from_code()\n        new_functions, updated_functions = self.compare_functions(parsed_functions)\n        self.update_functions_info(new_functions, updated_functions)",
+      "name_column": 6,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "__init__",
+      "md_content": [
+        "**__init__**: __init__函数的功能是初始化FunctionManager类的实例。\n\n**参数**:\n- project_root: 字符串类型，表示项目的根目录路径。\n- service_type: 表示服务类型，可以是'sensetime'、'openai'或其他值。\n\n**代码描述**:\nFunctionManager类的__init__方法负责初始化类的实例。在初始化过程中，首先设置了几个关键的属性：\n- `self.project_root` 存储传入的项目根目录路径。\n- `self.functions_info_path` 构造了函数信息文件的完整路径，该文件预期存储在项目根目录下的\"Tools\"文件夹中。\n- `self.functions_info` 调用`load_functions_info`方法，加载函数信息文件的内容到一个字典中。\n- `self.tools_path` 构造了工具代码文件的完整路径，该文件预期存储在项目根目录下的\"Tools\"文件夹中。\n- `self.tools_code` 调用`load_tools_code`方法，加载工具代码文件的内容到一个字符串中。\n- `self.save_path` 设置了工具代码文件的保存路径。\n- `self.processor` 实例化了一个CodeAnalyser对象，用于分析代码。\n\n接下来，根据`service_type`参数的值，决定使用哪种服务类来初始化`self.service`属性：\n- 如果`service_type`是'sensetime'或者None，那么实例化一个AuthenticatedRequestSender对象，用于处理与SenseTime服务的交互。\n- 如果`service_type`是'openai'，那么实例化一个OpenAIService对象，用于处理与OpenAI服务的交互。\n- 如果`service_type`是其他值，则抛出一个ValueError异常，提示未知的服务类型。\n\n通过这种方式，FunctionManager类能够根据不同的服务类型，选择性地与不同的API服务进行交互。\n\n**注意**:\n- 在使用FunctionManager类之前，需要确保项目根目录下存在\"Tools\"文件夹，并且该文件夹中包含了正确的`functions_info.json`和`tools.py`文件。\n- 在实例化FunctionManager类时，必须提供有效的`project_root`路径和`service_type`。\n- 当`service_type`不是预期值时，会抛出异常，因此在调用时需要注意传入正确的服务类型。\n- `service_type`的值决定了如何与外部服务进行交互，因此在使用FunctionManager类之前，需要根据实际情况设置正确的服务类型。"
+      ],
+      "code_start_line": 8,
+      "code_end_line": 21,
+      "params": [
+        "self",
+        "project_root",
+        "service_type"
+      ],
+      "have_return": false,
+      "code_content": "    def __init__(self, project_root: str, service_type):\n        self.project_root = project_root\n        self.functions_info_path = os.path.join(project_root, \"Tools\", \"functions_info.json\")\n        self.functions_info = self.load_functions_info()    #dict\n        self.tools_path = os.path.join(project_root, \"Tools\", \"tools.py\")\n        self.tools_code = self.load_tools_code()            #str\n        self.save_path = os.path.join(\"Tools\", \"tools.py\")\n        self.processor = CodeAnalyser()\n        if service_type in ['sensetime', None]:\n            self.service = AuthenticatedRequestSender()\n        elif service_type == 'openai':\n            self.service = OpenAIService()\n        else:\n            raise ValueError('未知的服务类型')\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [
+        "LLM_API\\open_ai.py/OpenAIService",
+        "LLM_API\\sense_time.py/AuthenticatedRequestSender",
+        "Tools\\use_tools.py/FunctionManager/load_functions_info",
+        "Tools\\use_tools.py/FunctionManager/load_tools_code"
+      ],
+      "special_reference_type": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "FunctionDef",
+      "name": "load_functions_info",
+      "md_content": [
+        "**load_functions_info**: load_functions_info函数的作用是从指定路径加载函数信息。\n\n**参数**:\n· 无参数\n\n**代码描述**:\nload_functions_info函数首先检查指定路径下的文件是否存在，如果存在则使用`json.load`方法加载文件内容并返回，否则返回一个空字典。\n\n在项目中，load_functions_info函数被FunctionManager模块中的__init__函数调用。在__init__函数中，首先设置了函数信息文件的路径，然后调用load_functions_info函数加载函数信息，最后将加载的函数信息存储在self.functions_info中供其他功能使用。\n\n**注意**:\n对于函数信息文件的路径和格式有一定的要求，需要确保文件存在且格式正确。\n\n**输出示例**:\n{\n    \"functions\": [\n        {\n            \"name\": \"function1\",\n            \"description\": \"This is function 1\"\n        },\n        {\n            \"name\": \"function2\",\n            \"description\": \"This is function 2\"\n        }\n    ]\n}"
+      ],
+      "code_start_line": 23,
+      "code_end_line": 28,
+      "params": [
+        "self"
+      ],
+      "have_return": true,
+      "code_content": "    def load_functions_info(self):\n        if os.path.exists(self.functions_info_path):\n            with open(self.functions_info_path, 'r') as file:\n                return json.load(file)\n        else:\n            return {\"functions\": []}\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "Tools\\use_tools.py/FunctionManager/__init__"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "load_tools_code",
+      "md_content": [
+        "**load_tools_code**: load_tools_code的功能是从tools.py文件中加载代码并返回其内容。\n**参数**：该函数没有参数。\n**代码描述**：load_tools_code函数通过打开tools.py文件，读取其中的内容，并返回该内容。在项目中，load_tools_code函数被__init__函数调用，用于加载tools.py文件中的代码内容。在__init__函数中，tools.py文件的路径由tools_path属性指定，load_tools_code函数被调用以加载该文件的内容并存储在tools_code属性中。\n**注意**：在调用load_tools_code函数之前，请确保tools.py文件存在且可读。\n**输出示例**：假设tools.py文件中的内容为：\"def tool_function():\\n    return 'This is a tool function'\\n\"，则load_tools_code函数的返回值为\"def tool_function():\\n    return 'This is a tool function'\\n\"。"
+      ],
+      "code_start_line": 30,
+      "code_end_line": 32,
+      "params": [
+        "self"
+      ],
+      "have_return": true,
+      "code_content": "    def load_tools_code(self):\n        with open(self.tools_path, 'r') as file:\n            return file.read()\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "Tools\\use_tools.py/FunctionManager/__init__"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "update_functions_info",
+      "md_content": [
+        "**update_functions_info**: update_functions_info的功能是将给定的函数名称和函数代码添加到functions_info字典中的\"functions\"列表中。\n**参数**:\n· function_name: 函数名称，表示要添加的函数的名称。\n· function_code: 函数代码，表示要添加的函数的代码内容。\n**代码描述**:\nupdate_functions_info函数接受两个参数，分别是函数名称和函数代码。它将这两个参数封装成一个字典，然后将该字典添加到functions_info字典中的\"functions\"列表中。这样可以方便地存储和管理不同函数的名称和代码内容。\n\n在项目中，update_functions_info函数被update_func_json对象调用。update_func_json对象首先解析代码中的函数信息，然后与已有的函数信息进行比较，最后调用update_functions_info函数将新函数和更新的函数信息添加到functions_info字典中的\"functions\"列表中。通过这种方式，update_functions_info函数与update_func_json对象协同工作，实现了对函数信息的更新和管理。\n**注意**:\n在调用update_functions_info函数时，确保传入正确的函数名称和函数代码，以便正确地更新函数信息。"
+      ],
+      "code_start_line": 34,
+      "code_end_line": 35,
+      "params": [
+        "self",
+        "function_name",
+        "function_code"
+      ],
+      "have_return": false,
+      "code_content": "    def update_functions_info(self, function_name, function_code):\n        self.functions_info[\"functions\"].append({\"name\": function_name, \"code\": function_code})\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "Tools\\use_tools.py/FunctionManager/update_func_json"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "save_functions_info",
+      "md_content": [
+        "**save_functions_info**: save_functions_info函数的功能是将函数信息保存到文件中。\n\n**参数**:\n· 无\n\n**代码描述**:\nsave_functions_info函数通过打开指定路径的文件，并使用json.dump将函数信息以缩进格式写入文件中。这个函数负责将函数信息保存到文件中，以便后续使用。\n\n在项目中，save_functions_info函数被update_functions_info函数调用。update_functions_info函数负责更新函数信息，包括将新函数添加到functions_info中以及更新已有函数的信息。在更新完函数信息后，update_functions_info函数会调用save_functions_info函数，以确保更新后的信息被保存到文件中。\n\n**注意**:\n- 在使用save_functions_info函数时，确保已经设置了functions_info_path和functions_info这两个属性，以便正确保存函数信息到指定文件中。"
+      ],
+      "code_start_line": 37,
+      "code_end_line": 39,
+      "params": [
+        "self"
+      ],
+      "have_return": false,
+      "code_content": "    def save_functions_info(self):\n        with open(self.functions_info_path, 'w') as file:\n            json.dump(self.functions_info, file, indent=4)\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "Tools\\use_tools.py/FunctionManager/update_functions_info_0(name_duplicate_version)"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "parse_functions_from_code",
+      "md_content": [
+        "**parse_functions_from_code**: parse_functions_from_code函数的功能是从给定的工具代码中解析出独立的函数，并提取它们的相关信息。\n\n**parameters**:\n· 无\n\n**Code Description**: 该函数首先通过ast模块解析工具代码，然后获取所有没有父节点的函数，将其视为独立的方法。对于每个独立的函数，会提取其源代码并解析成函数节点，然后调用get_return_expression函数提取返回表达式，并将提取的返回表达式存储起来。最终，返回包含独立函数信息的列表。\n\n在项目中，parse_functions_from_code函数被update_func_json函数调用。在update_func_json函数中，会解析工具代码中的函数信息，比较新旧函数，并更新函数信息。\n\n**Note**: 无\n\n**Output Example**: \n如果独立函数的返回值表达式为`ast.Constant(value=10, kind=None)`，则返回值为`[(node_type, name, start_line, end_line, None, parameters, source_code, \"ast.Constant(value=10, kind=None)\")]`。"
+      ],
+      "code_start_line": 41,
+      "code_end_line": 58,
+      "params": [
+        "self"
+      ],
+      "have_return": true,
+      "code_content": "    def parse_functions_from_code(self):\n        tree = ast.parse(self.tools_code)\n        functions_and_classes = self.processor.get_functions_and_classes(self.tools_code)\n\n        # 获取所有没有父节点的函数，将其视为独立的方法\n        standalone_functions = []\n        for node_type, name, start_line, end_line, parent_name, parameters in functions_and_classes:\n            if parent_name is None:\n                # 获取函数源代码\n                source_code = self.get_function_source_code(name, start_line, end_line)\n                \n                # 解析函数\n                function_node = ast.parse(source_code).body[0]\n                return_expr = self.get_return_expression(function_node)\n\n                standalone_functions.append((node_type, name, start_line, end_line, None, parameters, source_code, return_expr))\n\n        return standalone_functions\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "Tools\\use_tools.py/FunctionManager/update_func_json"
+      ],
+      "reference_who": [
+        "Tools\\use_tools.py/FunctionManager/get_return_expression",
+        "Tools\\use_tools.py/FunctionManager/get_function_source_code"
+      ],
+      "special_reference_type": [
+        false,
+        false
+      ]
+    },
+    {
+      "type": "FunctionDef",
+      "name": "get_return_expression",
+      "md_content": [
+        "**get_return_expression**: get_return_expression函数的功能是从函数节点中提取返回表达式。\n\n**parameters**:\n· self: 对象本身\n· function_node: 函数节点，表示待提取返回表达式的函数\n\n**Code Description**: 该函数通过遍历函数节点中的所有子节点，查找是否存在返回语句。如果存在返回语句，则提取其中的返回值表达式并返回；如果不存在返回值，则返回None。\n\n在项目中，get_return_expression函数被parse_functions_from_code函数调用。在parse_functions_from_code函数中，首先解析工具代码，然后获取所有没有父节点的函数，将其视为独立的方法。对于每个独立的函数，会获取其源代码并解析成函数节点，然后调用get_return_expression函数提取返回表达式，并将提取的返回表达式存储起来。\n\n**Note**: 无\n\n**Output Example**: \n如果返回值表达式为`ast.Constant(value=10, kind=None)`，则返回值为`\"ast.Constant(value=10, kind=None)\"`。"
+      ],
+      "code_start_line": 60,
+      "code_end_line": 67,
+      "params": [
+        "self",
+        "function_node"
+      ],
+      "have_return": true,
+      "code_content": "    def get_return_expression(self, function_node):\n        for node in ast.walk(function_node):\n            if isinstance(node, ast.Return):\n                if node.value:\n                    return ast.dump(node.value)\n                else:\n                    return None\n        return None\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "Tools\\use_tools.py/FunctionManager/parse_functions_from_code"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "get_function_source_code",
+      "md_content": [
+        "**get_function_source_code**: get_function_source_code函数的作用是从原始代码中提取特定函数的源代码。\n**parameters**:\n· name: 函数名称\n· start_line: 函数起始行号\n· end_line: 函数结束行号\n\n**Code Description**: 该函数通过传入函数名称、起始行号和结束行号，从原始代码中提取指定函数的源代码。首先，将原始代码按行拆分为列表，然后根据给定的起始行号和结束行号提取函数的源代码，最后将提取的源代码拼接为字符串并返回。\n\n在项目中，该函数被parse_functions_from_code对象调用。在parse_functions_from_code函数中，首先解析原始代码并获取所有函数和类，然后遍历这些函数和类，对于没有父节点的函数（即独立的方法），调用get_function_source_code函数提取函数的源代码，最终将提取的函数信息存储在standalone_functions列表中并返回。\n\n**Note**: 请确保传入正确的函数名称、起始行号和结束行号，以便准确提取函数的源代码。\n**Output Example**: \n```python\ndef example_function():\n    print(\"This is an example function.\")\n```"
+      ],
+      "code_start_line": 70,
+      "code_end_line": 75,
+      "params": [
+        "self",
+        "name",
+        "start_line",
+        "end_line"
+      ],
+      "have_return": true,
+      "code_content": "    def get_function_source_code(self, name, start_line, end_line):\n        # 从原始代码中提取函数的源代码\n        lines = self.tools_code.split('\\n')\n        source_lines = lines[start_line - 1:end_line]\n        source_code = '\\n'.join(source_lines)\n        return source_code\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "Tools\\use_tools.py/FunctionManager/parse_functions_from_code"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "compare_functions",
+      "md_content": [
+        "**compare_functions**: compare_functions函数的功能是比较解析后的函数信息与已有函数信息，更新已有函数的描述字段或将新函数视为新添加函数。\n\n**参数**:\n· parsed_functions: 解析后的函数信息列表，包括节点类型、名称、起始行、结束行、父级名称、参数、源代码和返回表达式。\n\n**代码描述**:\ncompare_functions函数首先将已有函数信息存储在existing_functions字典中，键为函数名称，值为函数信息。然后初始化新函数列表new_functions和更新函数列表updated_functions。接下来，对解析后的每个函数信息进行遍历，检查函数是否存在于已有函数信息中。如果存在，则检查是否需要更新描述字段，若原描述为空，则使用服务的ask_once方法补充描述信息。如果有需要更新的字段，则更新函数信息并添加到更新函数列表中。若函数不存在于已有函数信息中，则视为新函数，同样使用ask_once方法为新函数生成描述信息并添加到新函数列表中。\n\n**注意**: 在调用compare_functions函数前，请确保已解析函数信息并传入正确的参数列表。在使用ask_once方法时，需确保服务已正确初始化并OpenAI模块已正确导入。\n\n**输出示例**:\n假设生成了新函数信息列表new_functions和更新函数信息列表updated_functions，则函数返回值为(new_functions, updated_functions)。"
+      ],
+      "code_start_line": 77,
+      "code_end_line": 109,
+      "params": [
+        "self",
+        "parsed_functions"
+      ],
+      "have_return": true,
+      "code_content": "    def compare_functions(self, parsed_functions):\n        existing_functions = {func['name']: func for func in self.functions_info['functions']}\n        new_functions = []\n        updated_functions = []\n\n        for node_type, name, start_line, end_line, parent_name, parameters, source_code, return_expr in parsed_functions:\n            if name in existing_functions:\n                existing_func = existing_functions[name]\n                # 检查是否有需要更新的描述字段\n                updated_fields = {}\n                if existing_func.get('description') is None:\n                    # 如果原描述为空，尝试用代码解析补充\n                    update_description=self.service.ask_once(f\"please return a description for the function '{name}', of the following content:'{source_code}' focusing on its use, don't return any other irrelevant information.\")\n                    updated_fields['description'] = update_description\n                # 其他字段的更新逻辑，比如输入参数、输出参数、依赖项等\n\n                # 如果有需要更新的字段，更新函数信息\n                if updated_fields:\n                    existing_func.update(updated_fields)\n                    updated_functions.append(existing_func)\n            else:\n                # 如果函数不存在于已有描述中，视为新函数\n                update_description=self.service.ask_once(f\"please return a description for the function '{name}', of the following content:'{source_code}' focusing on its use, don't return any other irrelevant information.\")\n                new_functions.append({\n                    \"name\": name,\n                    \"description\": update_description,\n                    \"input\": parameters,  # 这里将参数作为输入\n                    \"output\": return_expr,  # 输出字段为空，您可以自行补充\n                    \"file_path\": self.save_path,  # 统一的文件路径\n                    \"dependencies\": []  # 暂时将依赖项设置为空列表\n                })\n\n        return new_functions, updated_functions\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "Tools\\use_tools.py/FunctionManager/update_func_json"
+      ],
+      "reference_who": [
+        "LLM_API\\open_ai.py/OpenAIService/ask_once",
+        "LLM_API\\sense_time.py/AuthenticatedRequestSender/ask_once"
+      ],
+      "special_reference_type": [
+        false,
+        false
+      ]
+    },
+    {
+      "type": "FunctionDef",
+      "name": "update_functions_info",
+      "md_content": [
+        "**update_functions_info**: update_functions_info函数的功能是将新函数添加到functions_info中并更新已有函数的信息，最后保存更新后的信息到文件中。\n\n**参数**:\n· new_functions: 要添加到functions_info中的新函数列表。\n· updated_functions: 包含已更新信息的函数列表。\n\n**代码描述**:\nupdate_functions_info函数首先将new_functions中的新函数添加到functions_info['functions']中。然后，通过遍历updated_functions列表，找到已有函数并更新其信息。更新后，调用save_functions_info函数将更新后的信息保存到文件中。\n\n**注意**:\n- 在调用update_functions_info函数之前，确保已正确设置了functions_info属性和functions_info_path属性，以便正确保存函数信息到文件中。"
+      ],
+      "code_start_line": 111,
+      "code_end_line": 121,
+      "params": [
+        "self",
+        "new_functions",
+        "updated_functions"
+      ],
+      "have_return": false,
+      "code_content": "    def update_functions_info(self, new_functions, updated_functions):\n        # 将新函数添加到 functions_info 中\n        self.functions_info['functions'].extend(new_functions)\n        # 更新已有函数的信息\n        for func in updated_functions:\n            for i, existing_func in enumerate(self.functions_info['functions']):\n                if existing_func['name'] == func['name']:\n                    self.functions_info['functions'][i] = func\n\n        # 保存更新后的信息到文件\n        self.save_functions_info()\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "Tools\\use_tools.py/FunctionManager/update_func_json"
+      ],
+      "reference_who": [
+        "Tools\\use_tools.py/FunctionManager/save_functions_info"
+      ],
+      "special_reference_type": [
+        false
+      ]
+    },
+    {
+      "type": "FunctionDef",
+      "name": "update_func_json",
+      "md_content": [
+        "**update_func_json**: update_func_json函数的功能是解析代码中的函数信息，比较新旧函数信息，并更新函数信息。\n\n**参数**:\n· 无\n\n**代码描述**:\nupdate_func_json函数首先调用parse_functions_from_code函数解析代码中的函数信息，然后调用compare_functions函数比较已解析的函数信息与已有函数信息，最后调用update_functions_info函数更新已有函数的描述字段或将新函数添加到函数信息中。\n\n在项目中，update_func_json函数与parse_functions_from_code、compare_functions和update_functions_info函数协同工作，实现了对函数信息的解析、比较和更新管理。\n\n**注意**:\n在调用update_func_json函数时，无需传入额外参数，它会自动执行解析、比较和更新函数信息的操作。"
+      ],
+      "code_start_line": 123,
+      "code_end_line": 126,
+      "params": [
+        "self"
+      ],
+      "have_return": false,
+      "code_content": "    def update_func_json(self):\n        parsed_functions = self.parse_functions_from_code()\n        new_functions, updated_functions = self.compare_functions(parsed_functions)\n        self.update_functions_info(new_functions, updated_functions)",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [
+        "Tools\\use_tools.py/FunctionManager/update_functions_info",
+        "Tools\\use_tools.py/FunctionManager/parse_functions_from_code",
+        "Tools\\use_tools.py/FunctionManager/compare_functions",
+        "Tools\\use_tools.py/FunctionManager/update_functions_info_0(name_duplicate_version)"
+      ],
+      "special_reference_type": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  ],
+  "Tools\\__init__.py": [],
+  "UI\\JoiningUI.py": [],
+  "WebExecuter\\web_executer.py": [
+    {
+      "type": "ClassDef",
+      "name": "WebSearch",
+      "md_content": [
+        "**WebSearch**: WebSearch的功能是根据指定的搜索引擎执行搜索操作。\n\n**attributes**:\n· search_engine: 搜索引擎类型，默认为'bing'。\n\n**Code Description**:\nWebSearch类包含一个构造函数__init__，用于初始化搜索引擎类型。search方法根据指定的搜索引擎类型执行搜索操作，支持Google和Bing搜索引擎。根据搜索结果，返回包含标题和链接的列表。\n\n在项目中，WebSearch类用于执行Web搜索操作。通过调用WebExecuter模块中的其他功能，实现对指定搜索引擎的搜索功能。\n\n**Note**:\n对于不支持的搜索引擎类型，会引发ValueError异常。\n在搜索过程中，如果发生异常，将打印错误信息并返回None。\n\n**Output Example**:\n(['Title1', 'Title2', ...], ['Link1', 'Link2', ...])"
+      ],
+      "code_start_line": 13,
+      "code_end_line": 58,
+      "params": [],
+      "have_return": true,
+      "code_content": "class WebSearch:\n    def __init__(self, search_engine='bing'):\n        self.search_engine = search_engine\n\n    def search(self, query):\n        if self.search_engine == 'google':\n            url = f\"https://www.google.com/search?q={query}\"\n        elif self.search_engine == 'bing':\n            url = f\"https://www.bing.com/search?q={query}\"\n        else:\n            raise ValueError(\"Unsupported search engine\")\n\n        try:\n            headers = {\n                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'\n            }\n            response = requests.get(url, headers=headers)\n            response.raise_for_status()\n\n            soup = BeautifulSoup(response.text, 'lxml')\n            print(response)\n            # Google search\n            if self.search_engine == 'google':\n                search_results = soup.find_all('div', class_='g')\n                if search_results:\n                    titles, links = [], []\n                    for result_ in search_results[:10]:\n                        titles.append(result_.find('h3').get_text())\n                        links.append(result_.find('a')['href'])\n                    return titles, links\n\n            # Bing search\n            elif self.search_engine == 'bing':\n                search_results = soup.find_all('li', class_='b_algo')\n                if search_results:\n                    titles, links = [], []\n                    for result_ in search_results[:10]:\n                        titles.append(result_.find('h2').get_text())\n                        links.append(result_.find('a')['href'])\n                    return titles, links\n\n            return None, None\n\n        except Exception as e:\n            print(\"An error occurred:\", e)\n            return None, None\n",
+      "name_column": 6,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "WebExecuter\\__init__.py"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "__init__",
+      "md_content": [
+        "**__init__**: __init__函数的功能是初始化WebSearch对象。\n\n**参数**:\n· search_engine: 搜索引擎的名称，默认为'bing'。\n\n**代码描述**:\n这个__init__函数是WebSearch对象的构造函数。它接受一个参数search_engine，用于指定搜索引擎的名称。如果没有提供搜索引擎的名称，默认将使用'bing'作为搜索引擎。在函数内部，将传入的search_engine参数赋值给对象的search_engine属性，以便在后续的搜索操作中使用。\n\n**注意**:\n在实例化WebSearch对象时，可以选择指定搜索引擎的名称，如果不指定将默认使用'bing'作为搜索引擎。"
+      ],
+      "code_start_line": 14,
+      "code_end_line": 15,
+      "params": [
+        "self",
+        "search_engine"
+      ],
+      "have_return": false,
+      "code_content": "    def __init__(self, search_engine='bing'):\n        self.search_engine = search_engine\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "search",
+      "md_content": [
+        "**search**: search函数的功能是根据指定的搜索引擎（Google或Bing）和查询内容执行搜索，并返回搜索结果的标题和链接。\n\n**parameters**:\n· self: 指向当前实例的引用。\n· query: 要搜索的查询内容。\n\n**Code Description**:\nsearch函数根据self.search_engine的值选择使用Google还是Bing搜索引擎，并构建相应的搜索URL。然后，发送带有自定义User-Agent头的GET请求到搜索引擎的URL。接收到响应后，使用BeautifulSoup解析HTML内容，提取搜索结果的标题和链接信息。最多返回前10个搜索结果的标题和链接。\n\n**Note**: \n- 当self.search_engine不是'google'或'bing'时，会引发ValueError异常。\n- 如果发生任何异常，函数将返回(None, None)。\n\n**Output Example**:\n(['Title 1', 'Title 2', ...], ['Link 1', 'Link 2', ...])"
+      ],
+      "code_start_line": 17,
+      "code_end_line": 58,
+      "params": [
+        "self",
+        "query"
+      ],
+      "have_return": true,
+      "code_content": "    def search(self, query):\n        if self.search_engine == 'google':\n            url = f\"https://www.google.com/search?q={query}\"\n        elif self.search_engine == 'bing':\n            url = f\"https://www.bing.com/search?q={query}\"\n        else:\n            raise ValueError(\"Unsupported search engine\")\n\n        try:\n            headers = {\n                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'\n            }\n            response = requests.get(url, headers=headers)\n            response.raise_for_status()\n\n            soup = BeautifulSoup(response.text, 'lxml')\n            print(response)\n            # Google search\n            if self.search_engine == 'google':\n                search_results = soup.find_all('div', class_='g')\n                if search_results:\n                    titles, links = [], []\n                    for result_ in search_results[:10]:\n                        titles.append(result_.find('h3').get_text())\n                        links.append(result_.find('a')['href'])\n                    return titles, links\n\n            # Bing search\n            elif self.search_engine == 'bing':\n                search_results = soup.find_all('li', class_='b_algo')\n                if search_results:\n                    titles, links = [], []\n                    for result_ in search_results[:10]:\n                        titles.append(result_.find('h2').get_text())\n                        links.append(result_.find('a')['href'])\n                    return titles, links\n\n            return None, None\n\n        except Exception as e:\n            print(\"An error occurred:\", e)\n            return None, None\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "ClassDef",
+      "name": "BrowserExecute",
+      "md_content": [
+        "**BrowserExecute**: BrowserExecute的功能是执行浏览器操作。\n\n**attributes**:\n· driver_path: 浏览器驱动程序的路径\n\n**Code Description**:\n在BrowserExecute类中，首先通过初始化方法__init__()初始化浏览器驱动，然后定义了打开新标签页open_new_tab()、关闭当前标签页close_current_tab()、翻页操作page_turn()、搜索操作search()、下载PDF文件download_pdf()和开始爬取数据start_scraping()等方法。\n\n在__init__()方法中，通过传入的driver_path参数初始化Edge浏览器驱动，并设置了初始的base_url。\n\nopen_new_tab()方法用于在浏览器中打开新的标签页，并加载指定的url；close_current_tab()方法用于关闭当前标签页并切换回主标签页；page_turn()方法用于执行翻页操作，检查是否可以翻页并执行翻页动作；search()方法用于解析网页内容，提取标题、网址和发布时间，并根据设定的时间范围下载符合条件的PDF文件；download_pdf()方法用于下载PDF文件；start_scraping()方法用于开始爬取数据，加载初始页面并执行搜索操作，然后循环执行翻页和搜索操作，直到完成爬取。\n\n**Note**:\n- 在使用BrowserExecute类之前，需要确保已经安装了相应的浏览器驱动，并传入正确的driver_path参数。\n- 需要根据实际需求和网页结构调整解析网页内容的正则表达式。\n- 下载PDF文件的方法仅为示例，实际应用中需要根据具体情况进行调整。\n\n**Output Example**:\n正在下载: XXX文件\n下载成功: XXX.pdf"
+      ],
+      "code_start_line": 60,
+      "code_end_line": 152,
+      "params": [],
+      "have_return": true,
+      "code_content": "class BrowserExecute:\n    def __init__(self, driver_path):\n        # 初始化浏览器驱动\n        self.edge_service = webdriver.EdgeService(executable_path=driver_path)\n        self.browser = webdriver.Edge(service=self.edge_service)\n        self.base_url = 'http://www.cninfo.com.cn/new/fulltextSearch?notautosubmit=&keyWord=%E6%81%92%E5%A4%A7'\n\n    def open_new_tab(self, url):\n        # 打开新的 Tab\n        self.browser.execute_script(\"window.open('', '_blank');\")\n        # 切换到新 Tab\n        self.browser.switch_to.window(self.browser.window_handles[-1])\n        # 打开指定的url\n        self.browser.get(url)\n\n    def close_current_tab(self):\n        # 关闭当前 Tab\n        self.browser.close()\n        # 切换回主 Tab\n        self.browser.switch_to.window(self.browser.window_handles[0])\n\n    def page_turn(self):\n        try:\n            time.sleep(1)\n            next_button = self.browser.find_element(By.XPATH, '//*[@id=\"fulltext-search\"]/div[2]/div/div/div[2]/div[4]/div[2]/div/button[2]')\n            disabled_value = next_button.get_attribute(\"disabled\")\n            print(f\"Disabled attribute value: {disabled_value}\")\n            if disabled_value:\n                print(\"无法翻页已经达到最后一页\")\n                return 1\n            else:\n                next_button.click()\n                time.sleep(1)\n                data = self.browser.page_source\n                print(\"执行翻页操作\")\n                return data\n        except NoSuchElementException as e:\n            print(f\"发生异常: {e}\")\n            return None\n\n    def search(self, data):\n        # 解析网页标题\n        p_title = r'<span[^>]*class=\"r-title\"[^>]*>(.*?)</span>'\n        titles = re.findall(p_title, data)\n        \n        # 解析网页网址\n        p_href = r'<a target=\"_blank\" href=\"(.*?)\" data-id='\n        hrefs = re.findall(p_href, data)\n        \n        # 解析发布时间\n        p_time = re.compile(r'<span class=\"time\">\\s*([\\d-]+\\s*[\\d:]*\\s*)</span>')\n        times = re.findall(p_time, data)\n        \n        for index, href in enumerate(hrefs):\n            # 网址清理\n            cleaned_href = 'http://www.cninfo.com.cn' + re.sub('amp;', '', href)\n            \n            # 解析时间，确保时间格式正确\n            try:\n                parsed_date = datetime.strptime(times[index].strip(), \"%Y-%m-%d %H:%M\")\n            except ValueError:\n                print(f\"时间解析错误: {times[index]}\")\n                continue\n            \n            # 确认时间在设定范围内\n            if parsed_date >= datetime(2024, 2, 7, 0, 0):\n                print(f\"正在下载: {titles[index]}\")\n                # 下载PDF文件，这里仅显示下载逻辑的占位符\n                self.download_pdf(cleaned_href, titles[index])\n\n    def download_pdf(self, url, title):\n        # 假设的下载PDF文件的方法\n        try:\n            # 实际下载逻辑\n            response = requests.get(url)\n            filename = f\"{title}.pdf\"\n            with open(filename, 'wb') as f:\n                f.write(response.content)\n            print(f\"下载成功: {filename}\")\n        except Exception as e:\n            print(f\"下载失败: {e}\")\n\n    def start_scraping(self):\n        self.browser.get(self.base_url)\n        time.sleep(1)\n        data = self.browser.page_source\n        self.search(data)\n        while True:\n            data = self.page_turn()\n            if data == 1:\n                print(\"爬取完毕\")\n                break\n            self.search(data)",
+      "name_column": 6,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "__init__",
+      "md_content": [
+        "**__init__**: 初始化函数的作用是初始化浏览器驱动和设置基本URL。\n\n**参数**:\n· driver_path: 浏览器驱动程序的路径。\n\n**代码描述**:\n在这个初始化函数中，首先通过传入的driver_path参数来设置Edge浏览器的服务。然后使用该服务来实例化一个Edge浏览器对象。最后，将基本URL设置为'http://www.cninfo.com.cn/new/fulltextSearch?notautosubmit=&keyWord=%E6%81%92%E5%A4%A7'。\n\n**注意**:\n在使用该初始化函数时，需要确保传入正确的浏览器驱动程序的路径，以便成功初始化浏览器驱动。"
+      ],
+      "code_start_line": 61,
+      "code_end_line": 65,
+      "params": [
+        "self",
+        "driver_path"
+      ],
+      "have_return": false,
+      "code_content": "    def __init__(self, driver_path):\n        # 初始化浏览器驱动\n        self.edge_service = webdriver.EdgeService(executable_path=driver_path)\n        self.browser = webdriver.Edge(service=self.edge_service)\n        self.base_url = 'http://www.cninfo.com.cn/new/fulltextSearch?notautosubmit=&keyWord=%E6%81%92%E5%A4%A7'\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "open_new_tab",
+      "md_content": [
+        "**open_new_tab**: open_new_tab函数的功能是打开一个新的标签页。\n\n**parameters**:\n· url: 新标签页要打开的URL地址。\n\n**Code Description**:\n打开新的标签页，首先通过执行JavaScript代码在浏览器中打开一个空白的新标签页。然后切换到新打开的标签页，通过获取浏览器当前所有标签页的句柄，选择最后一个句柄来切换到新标签页。最后在新标签页中加载指定的URL地址。\n\n**Note**:\n- 在调用该函数之前，确保已经实例化了浏览器对象并赋值给self.browser。\n- 确保传入的url参数是一个有效的URL地址。"
+      ],
+      "code_start_line": 67,
+      "code_end_line": 73,
+      "params": [
+        "self",
+        "url"
+      ],
+      "have_return": false,
+      "code_content": "    def open_new_tab(self, url):\n        # 打开新的 Tab\n        self.browser.execute_script(\"window.open('', '_blank');\")\n        # 切换到新 Tab\n        self.browser.switch_to.window(self.browser.window_handles[-1])\n        # 打开指定的url\n        self.browser.get(url)\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "close_current_tab",
+      "md_content": [
+        "**close_current_tab**: close_current_tab函数的作用是关闭当前的标签页。\n\n**参数**:\n· 无参数\n\n**代码描述**:\n该函数首先关闭当前的标签页，然后切换回主标签页。关闭当前标签页是通过self.browser.close()实现的，这会关闭当前正在浏览的标签页。接着，通过self.browser.switch_to.window(self.browser.window_handles[0])将焦点切换回主标签页，即浏览器窗口中的第一个标签页。\n\n**注意**:\n在调用该函数时，会关闭当前标签页并切换回主标签页。"
+      ],
+      "code_start_line": 75,
+      "code_end_line": 79,
+      "params": [
+        "self"
+      ],
+      "have_return": false,
+      "code_content": "    def close_current_tab(self):\n        # 关闭当前 Tab\n        self.browser.close()\n        # 切换回主 Tab\n        self.browser.switch_to.window(self.browser.window_handles[0])\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "page_turn",
+      "md_content": [
+        "**page_turn**: page_turn函数的功能是执行网页翻页操作。\n\n**参数**：该函数没有参数。\n\n**代码描述**：page_turn函数首先通过time.sleep(1)等待1秒，然后查找页面中的下一页按钮。接着获取该按钮的disabled属性值，如果为True，则打印\"无法翻页已经达到最后一页\"并返回1；否则点击下一页按钮，再次等待1秒，获取当前页面的源代码，并返回该数据。在异常处理中，如果捕获到NoSuchElementException异常，则打印异常信息并返回None。\n\n在项目中，page_turn函数被start_scraping函数调用。start_scraping函数首先打开浏览器并获取页面源代码，然后调用page_turn函数执行翻页操作，直到返回值为1时停止翻页并打印\"爬取完毕\"。\n\n**注意**：在使用page_turn函数时，需要确保页面中存在下一页按钮，并且按钮未被禁用。\n\n**输出示例**：假设成功执行翻页操作后，返回当前页面的源代码。"
+      ],
+      "code_start_line": 81,
+      "code_end_line": 98,
+      "params": [
+        "self"
+      ],
+      "have_return": true,
+      "code_content": "    def page_turn(self):\n        try:\n            time.sleep(1)\n            next_button = self.browser.find_element(By.XPATH, '//*[@id=\"fulltext-search\"]/div[2]/div/div/div[2]/div[4]/div[2]/div/button[2]')\n            disabled_value = next_button.get_attribute(\"disabled\")\n            print(f\"Disabled attribute value: {disabled_value}\")\n            if disabled_value:\n                print(\"无法翻页已经达到最后一页\")\n                return 1\n            else:\n                next_button.click()\n                time.sleep(1)\n                data = self.browser.page_source\n                print(\"执行翻页操作\")\n                return data\n        except NoSuchElementException as e:\n            print(f\"发生异常: {e}\")\n            return None\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "WebExecuter\\web_executer.py/BrowserExecute/start_scraping"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "search",
+      "md_content": [
+        "**search**: search函数的功能是解析网页数据，提取标题、网址和发布时间信息，并根据设定条件下载对应的PDF文件。\n\n**参数**：此函数的参数。\n· data: 表示要解析的网页数据，包含标题、网址和发布时间等信息。\n\n**代码描述**：search函数首先通过正则表达式解析网页标题、网址和发布时间信息。然后，对每个网址进行清理和时间解析，确保时间格式正确。接着，判断时间是否在指定范围内，若符合条件则调用download_pdf函数下载对应的PDF文件。\n\n在项目中，search函数被WebExecuter\\web_executer.py/BrowserExecute/start_scraping对象调用。在start_scraping函数中，首先获取网页数据，然后调用search函数解析数据并下载PDF文件。若下载过程中出现异常，将捕获并打印错误信息，确保程序稳定可靠。\n\n**注意**：在使用search函数时，需要传入正确的网页数据参数，以确保能够成功解析并下载PDF文件。"
+      ],
+      "code_start_line": 100,
+      "code_end_line": 128,
+      "params": [
+        "self",
+        "data"
+      ],
+      "have_return": false,
+      "code_content": "    def search(self, data):\n        # 解析网页标题\n        p_title = r'<span[^>]*class=\"r-title\"[^>]*>(.*?)</span>'\n        titles = re.findall(p_title, data)\n        \n        # 解析网页网址\n        p_href = r'<a target=\"_blank\" href=\"(.*?)\" data-id='\n        hrefs = re.findall(p_href, data)\n        \n        # 解析发布时间\n        p_time = re.compile(r'<span class=\"time\">\\s*([\\d-]+\\s*[\\d:]*\\s*)</span>')\n        times = re.findall(p_time, data)\n        \n        for index, href in enumerate(hrefs):\n            # 网址清理\n            cleaned_href = 'http://www.cninfo.com.cn' + re.sub('amp;', '', href)\n            \n            # 解析时间，确保时间格式正确\n            try:\n                parsed_date = datetime.strptime(times[index].strip(), \"%Y-%m-%d %H:%M\")\n            except ValueError:\n                print(f\"时间解析错误: {times[index]}\")\n                continue\n            \n            # 确认时间在设定范围内\n            if parsed_date >= datetime(2024, 2, 7, 0, 0):\n                print(f\"正在下载: {titles[index]}\")\n                # 下载PDF文件，这里仅显示下载逻辑的占位符\n                self.download_pdf(cleaned_href, titles[index])\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "WebExecuter\\web_executer.py/BrowserExecute/start_scraping"
+      ],
+      "reference_who": [
+        "WebExecuter\\web_executer.py/BrowserExecute/download_pdf"
+      ],
+      "special_reference_type": [
+        false
+      ]
+    },
+    {
+      "type": "FunctionDef",
+      "name": "download_pdf",
+      "md_content": [
+        "**download_pdf**: download_pdf函数的功能是下载指定URL的PDF文件。\n\n**参数**：此函数的参数。\n· url: 表示要下载的PDF文件的URL。\n· title: 表示要保存的PDF文件的标题。\n\n**代码描述**：download_pdf函数通过传入的URL和标题，尝试下载对应的PDF文件。首先，使用requests库发送GET请求获取文件内容，然后将内容写入以标题命名的PDF文件中。如果下载成功，将打印\"下载成功: 文件名\"；如果下载失败，将打印\"下载失败: 错误信息\"。\n\n在项目中，download_pdf函数被WebExecuter\\web_executer.py/BrowserExecute/search对象调用。在search函数中，通过解析网页数据获取到PDF文件的URL和标题后，调用download_pdf函数下载PDF文件。如果下载过程中出现异常，将捕获并打印错误信息，保证程序的稳定性和可靠性。\n\n**注意**：在使用download_pdf函数时，需要确保传入正确的URL和标题参数，以确保能够成功下载PDF文件。"
+      ],
+      "code_start_line": 130,
+      "code_end_line": 140,
+      "params": [
+        "self",
+        "url",
+        "title"
+      ],
+      "have_return": false,
+      "code_content": "    def download_pdf(self, url, title):\n        # 假设的下载PDF文件的方法\n        try:\n            # 实际下载逻辑\n            response = requests.get(url)\n            filename = f\"{title}.pdf\"\n            with open(filename, 'wb') as f:\n                f.write(response.content)\n            print(f\"下载成功: {filename}\")\n        except Exception as e:\n            print(f\"下载失败: {e}\")\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [
+        "WebExecuter\\web_executer.py/BrowserExecute/search"
+      ],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "start_scraping",
+      "md_content": [
+        "**start_scraping**: start_scraping函数的功能是打开浏览器并开始网页数据抓取操作。\n\n**参数**：该函数没有参数。\n\n**代码描述**：start_scraping函数首先使用浏览器打开指定的base_url，并等待1秒。然后获取当前页面的源代码，并调用search函数解析数据。接着进入一个无限循环，每次循环中调用page_turn函数执行翻页操作，直到page_turn函数返回值为1时，循环结束并打印\"爬取完毕\"。\n\n在项目中，start_scraping函数是网页数据抓取的入口函数。通过打开浏览器、解析数据和执行翻页操作，实现了对网页内容的全面抓取。\n\n**注意**：在使用start_scraping函数时，需要确保已设置base_url，并且页面中存在下一页按钮以支持翻页操作。"
+      ],
+      "code_start_line": 142,
+      "code_end_line": 152,
+      "params": [
+        "self"
+      ],
+      "have_return": false,
+      "code_content": "    def start_scraping(self):\n        self.browser.get(self.base_url)\n        time.sleep(1)\n        data = self.browser.page_source\n        self.search(data)\n        while True:\n            data = self.page_turn()\n            if data == 1:\n                print(\"爬取完毕\")\n                break\n            self.search(data)",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [
+        "WebExecuter\\web_executer.py/BrowserExecute/page_turn",
+        "WebExecuter\\web_executer.py/BrowserExecute/search"
+      ],
+      "special_reference_type": [
+        false,
+        false
+      ]
+    }
+  ],
+  "WebExecuter\\__init__.py": [],
+  "WorkFlow\\action_graph.py": [
+    {
+      "type": "ClassDef",
+      "name": "ActionGraph",
+      "md_content": [
+        "**ActionGraph**: ActionGraph的功能是表示操作之间依赖关系的有向图。\n**attributes**:\n· nodes: 一个字典，存储图中的节点。\n· edges: 一个字典，存储图中的边。\n· execution_order: 一个列表，存储拓扑排序后的执行顺序。\n\n**Code Description**:\nActionGraph类代表了一个有向图，用于表示操作之间的依赖关系。该类包含了以下方法：\n\n- \\_\\_init\\_\\_(): 初始化ActionGraph对象，初始化节点、边和执行顺序列表。\n- add_node(node): 向图中添加一个节点。\n- add_edge(from_node, to_node): 向图中添加一条边，表示from_node指向to_node的关系。\n- topological_sort(): 对图进行拓扑排序，确定操作的执行顺序。\n\n在add_node方法中，将节点添加到nodes字典中。在add_edge方法中，将边添加到edges字典中，并更新from_node和to_node的前驱和后继关系。在topological_sort方法中，通过深度优先搜索算法对图进行拓扑排序，将执行顺序存储在execution_order列表中。\n\n**Note**: 在使用ActionGraph类时，可以通过add_node方法添加节点，通过add_edge方法添加边，最后通过调用topological_sort方法进行拓扑排序，得到操作的执行顺序。"
+      ],
+      "code_start_line": 13,
+      "code_end_line": 49,
+      "params": [],
+      "have_return": false,
+      "code_content": "class ActionGraph:\n    \"\"\"ActionGraph: a directed graph to represent the dependency between actions.\"\"\"\n\n    def __init__(self):\n        self.nodes = {}\n        self.edges = {}\n        self.execution_order = []\n\n    def add_node(self, node):\n        \"\"\"Add a node to the graph\"\"\"\n        self.nodes[node.key] = node\n\n    def add_edge(self, from_node: \"ActionNode\", to_node: \"ActionNode\"):\n        \"\"\"Add an edge to the graph\"\"\"\n        if from_node.key not in self.edges:\n            self.edges[from_node.key] = []\n        self.edges[from_node.key].append(to_node.key)\n        from_node.add_next(to_node)\n        to_node.add_prev(from_node)\n\n    def topological_sort(self):\n        \"\"\"Topological sort the graph\"\"\"\n        visited = set()\n        stack = []\n\n        def visit(k):\n            if k not in visited:\n                visited.add(k)\n                if k in self.edges:\n                    for next_node in self.edges[k]:\n                        visit(next_node)\n                stack.insert(0, k)\n\n        for key in self.nodes:\n            visit(key)\n\n        self.execution_order = stack\n",
+      "name_column": 6,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "__init__",
+      "md_content": [
+        "**__init__**: __init__函数的功能是初始化ActionGraph对象的属性。\n\n**参数**:\n· 无参数\n\n**代码描述**:\n在这个函数中，初始化了ActionGraph对象的三个属性：nodes，edges和execution_order。其中，nodes是一个空字典，用于存储图中的节点；edges也是一个空字典，用于存储图中的边；execution_order是一个空列表，用于存储节点的执行顺序。\n\n**注意**:\n在使用ActionGraph对象时，可以通过调用__init__函数来初始化对象的属性，以便后续对图的操作和处理。"
+      ],
+      "code_start_line": 16,
+      "code_end_line": 19,
+      "params": [
+        "self"
+      ],
+      "have_return": false,
+      "code_content": "    def __init__(self):\n        self.nodes = {}\n        self.edges = {}\n        self.execution_order = []\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "add_node",
+      "md_content": [
+        "**add_node**: add_node函数的功能是将一个节点添加到图中。\n**parameters**:\n· node: 要添加到图中的节点对象。\n**Code Description**:\n这个add_node函数接受一个节点对象作为参数，并将该节点添加到图中。在函数内部，通过节点的key作为键，将节点对象存储在self.nodes字典中。这样可以方便地通过节点的key来访问和操作节点对象。\n**Note**:\n- 在调用add_node函数时，确保传入的参数是一个有效的节点对象。\n- 添加节点后，可以通过self.nodes来访问和管理已添加的节点。"
+      ],
+      "code_start_line": 21,
+      "code_end_line": 23,
+      "params": [
+        "self",
+        "node"
+      ],
+      "have_return": false,
+      "code_content": "    def add_node(self, node):\n        \"\"\"Add a node to the graph\"\"\"\n        self.nodes[node.key] = node\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "add_edge",
+      "md_content": [
+        "**add_edge**: add_edge函数的作用是向图中添加一条边。\n**parameters**:\n· from_node: 表示边的起始节点，类型为ActionNode。\n· to_node: 表示边的结束节点，类型为ActionNode。\n**Code Description**:\n如果from_node的key不在self.edges中，则将from_node的key添加到self.edges中，并将to_node的key添加到from_node对应的值中。然后调用from_node的add_next方法，将to_node添加为from_node的下一个节点。最后调用to_node的add_prev方法，将from_node添加为to_node的前一个节点。\n**Note**: 请确保from_node和to_node参数的类型为ActionNode类的实例。"
+      ],
+      "code_start_line": 25,
+      "code_end_line": 31,
+      "params": [
+        "self",
+        "from_node",
+        "to_node"
+      ],
+      "have_return": false,
+      "code_content": "    def add_edge(self, from_node: \"ActionNode\", to_node: \"ActionNode\"):\n        \"\"\"Add an edge to the graph\"\"\"\n        if from_node.key not in self.edges:\n            self.edges[from_node.key] = []\n        self.edges[from_node.key].append(to_node.key)\n        from_node.add_next(to_node)\n        to_node.add_prev(from_node)\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "topological_sort",
+      "md_content": [
+        "**topological_sort**: topological_sort函数的功能是对图进行拓扑排序。\n\n**parameters**:\n· 无参数\n\n**Code Description**:\n该函数实现了对图进行拓扑排序的操作。首先，创建了一个空集合visited用于存储已访问过的节点，以及一个空栈stack用于存储排序后的节点。接着定义了内部函数visit(k)，用于递归访问节点k及其相邻节点。在visit函数中，首先检查节点k是否已经访问过，若未访问过，则将其加入visited集合中，并递归访问k的相邻节点。最后，将节点k插入到stack的首位，实现逆序排列。接着，对图中的每个节点依次调用visit函数，完成整个图的拓扑排序。最终，将排序后的节点顺序存储在对象的execution_order属性中。\n\n**Note**:\n- 在调用topological_sort函数前，需要确保图的节点和边已经正确设置。\n- 该函数实现了拓扑排序算法，适用于有向无环图（DAG）。"
+      ],
+      "code_start_line": 33,
+      "code_end_line": 49,
+      "params": [
+        "self"
+      ],
+      "have_return": false,
+      "code_content": "    def topological_sort(self):\n        \"\"\"Topological sort the graph\"\"\"\n        visited = set()\n        stack = []\n\n        def visit(k):\n            if k not in visited:\n                visited.add(k)\n                if k in self.edges:\n                    for next_node in self.edges[k]:\n                        visit(next_node)\n                stack.insert(0, k)\n\n        for key in self.nodes:\n            visit(key)\n\n        self.execution_order = stack\n",
+      "name_column": 8,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    },
+    {
+      "type": "FunctionDef",
+      "name": "visit",
+      "md_content": [
+        "**visit**: visit函数的功能是执行拓扑排序中的访问操作。\n\n**parameters**:\n· k: 表示当前访问的节点。\n\n**Code Description**:\nvisit函数实现了拓扑排序中对节点的访问操作。首先，函数会检查当前节点k是否已经被访问过，如果没有被访问过，则将其添加到已访问的节点集合中。接着，如果当前节点k存在于图中的边中，函数会递归地对当前节点的邻居节点进行访问操作。最后，函数会将当前节点k插入到栈中，以确保拓扑排序的正确顺序。\n\n**Note**:\n- 在调用visit函数时，需要确保传入的参数k是图中的有效节点。\n- visit函数实现了深度优先搜索（DFS）的思想，通过递归地访问节点来完成拓扑排序的过程。"
+      ],
+      "code_start_line": 38,
+      "code_end_line": 44,
+      "params": [
+        "k"
+      ],
+      "have_return": false,
+      "code_content": "        def visit(k):\n            if k not in visited:\n                visited.add(k)\n                if k in self.edges:\n                    for next_node in self.edges[k]:\n                        visit(next_node)\n                stack.insert(0, k)\n",
+      "name_column": 12,
+      "item_status": "doc_up_to_date",
+      "who_reference_me": [],
+      "reference_who": [],
+      "special_reference_type": []
+    }
+  ],
+  "WorkFlow\\__init__.py": []
+}

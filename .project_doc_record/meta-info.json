@@ -1,0 +1,22 @@
+{
+  "doc_version": "8e18323af51690ef284ee4a76a8181fbf686e302",
+  "in_generation_process": false,
+  "fake_file_reflection": {
+    "Chat/joining_chat.py": "Chat/joining_chat_latest_version.py",
+    "FileProcess/FileHandler.py": "FileProcess/FileHandler_latest_version.py",
+    "FileProcess/__init__.py": "FileProcess/__init___latest_version.py",
+    "Memory/local_memory.py": "Memory/local_memory_latest_version.py",
+    "WorkFlow/__init__.py": "WorkFlow/__init___latest_version.py",
+    "WorkFlow/essay_writer.py": "WorkFlow/essay_writer_latest_version.py"
+  },
+  "jump_files": [
+    "Tools/__init__.py",
+    "Tools/tools.py",
+    "Tools/use_tools.py",
+    "WebExecuter/__init__.py",
+    "WebExecuter/web_executer.py",
+    "WorkFlow/action_graph.py",
+    "joining_agent.py"
+  ],
+  "deleted_items_from_older_meta": []
+}

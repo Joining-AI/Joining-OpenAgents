@@ -1,54 +1,54 @@
-class EssayWriterStatus:
-    def __init__(self):
-        # åˆå§‹åŒ–æ—¶ï¼Œå„æ­¥éª¤çš„çŠ¶æ€å’Œæç¤º
-        self.initial_status = [
-            {'procedure': "draft", 'status': 0},
-            {'procedure': "writing", 'status': 0}
-            # å¯ä»¥ç»§ç»­æ·»åŠ å…¶ä»–æ­¥éª¤
-        ]
-        self.current_status = self.initial_status.copy()  # ä½¿ç”¨.copy()ç¡®ä¿åŸå§‹åˆ—è¡¨ä¸è¢«ä¿®æ”¹
-        self.current_prompt = [
-            {'procedure': "draft", 'prompt': 'promptstr1'},
-            {'procedure': "writing", 'prompt': 'promptstr2'}
-            # å¯ä»¥ç»§ç»­æ·»åŠ å…¶ä»–æ­¥éª¤çš„æç¤º
-        ]
-
-    def update_(self, instruction):
-        self.current_status
-
-    def update_status(self, procedure, new_status):
-        """æ›´æ–°ç‰¹å®šæ­¥éª¤çš„çŠ¶æ€"""
-        for status in self.current_status:
-            if status['procedure'] == procedure:
-                status['status'] = new_status
-                return True  # æ›´æ–°æˆåŠŸ
-        return False  # æœªæ‰¾åˆ°æ­¥éª¤ï¼Œæ›´æ–°å¤±è´¥
-
-    def update_prompt(self, procedure, new_prompt):
-        """æ›´æ–°ç‰¹å®šæ­¥éª¤çš„æç¤º"""
-        for prompt in self.current_prompt:
-            if prompt['procedure'] == procedure:
-                prompt['prompt'] = new_prompt
-                return True  # æ›´æ–°æˆåŠŸ
-        return False  # æœªæ‰¾åˆ°æ­¥éª¤ï¼Œæ›´æ–°å¤±è´¥
-    
-    def get_current_prompt(self, procedure):
-        """è·å–ç‰¹å®šæ­¥éª¤çš„å½“å‰æç¤º"""
-        for prompt in self.current_prompt:
-            if prompt['procedure'] == procedure:
-                return prompt['prompt']
-        return None  # æœªæ‰¾åˆ°æ­¥éª¤
-
-    def add_step(self, procedure, status=0, prompt=''):
-        """æ·»åŠ æ–°çš„æ­¥éª¤"""
-        self.current_status.append({'procedure': procedure, 'status': status})
-        self.current_prompt.append({'procedure': procedure, 'prompt': prompt})
-
-    def complete_step(self, procedure):
-        """æ ‡è®°æ­¥éª¤ä¸ºå®ŒæˆçŠ¶æ€"""
-        self.update_status(procedure, 1)
-
-    def reset(self):
-        """é‡ç½®çŠ¶æ€åˆ°åˆå§‹çŠ¶æ€"""
-        self.current_status = self.initial_status.copy()
-        self.current_prompt = self.current_prompt.copy()  # æ ¹æ®éœ€è¦å†³å®šæ˜¯å¦ä¹Ÿé‡ç½®æç¤º
+class EssayWriterStatus:
+    def __init__(self):
+        # ³õÊ¼»¯Ê±£¬¸÷²½ÖèµÄ×´Ì¬ºÍÌáÊ¾
+        self.initial_status = [
+            {'procedure': "draft", 'status': 0},
+            {'procedure': "writing", 'status': 0}
+            # ¿ÉÒÔ¼ÌĞøÌí¼ÓÆäËû²½Öè
+        ]
+        self.current_status = self.initial_status.copy()  # Ê¹ÓÃ.copy()È·±£Ô­Ê¼ÁĞ±í²»±»ĞŞ¸Ä
+        self.current_prompt = [
+            {'procedure': "draft", 'prompt': 'promptstr1'},
+            {'procedure': "writing", 'prompt': 'promptstr2'}
+            # ¿ÉÒÔ¼ÌĞøÌí¼ÓÆäËû²½ÖèµÄÌáÊ¾
+        ]
+
+    def update_(self, instruction):
+        self.current_status
+
+    def update_status(self, procedure, new_status):
+        """¸üĞÂÌØ¶¨²½ÖèµÄ×´Ì¬"""
+        for status in self.current_status:
+            if status['procedure'] == procedure:
+                status['status'] = new_status
+                return True  # ¸üĞÂ³É¹¦
+        return False  # Î´ÕÒµ½²½Öè£¬¸üĞÂÊ§°Ü
+
+    def update_prompt(self, procedure, new_prompt):
+        """¸üĞÂÌØ¶¨²½ÖèµÄÌáÊ¾"""
+        for prompt in self.current_prompt:
+            if prompt['procedure'] == procedure:
+                prompt['prompt'] = new_prompt
+                return True  # ¸üĞÂ³É¹¦
+        return False  # Î´ÕÒµ½²½Öè£¬¸üĞÂÊ§°Ü
+    
+    def get_current_prompt(self, procedure):
+        """»ñÈ¡ÌØ¶¨²½ÖèµÄµ±Ç°ÌáÊ¾"""
+        for prompt in self.current_prompt:
+            if prompt['procedure'] == procedure:
+                return prompt['prompt']
+        return None  # Î´ÕÒµ½²½Öè
+
+    def add_step(self, procedure, status=0, prompt=''):
+        """Ìí¼ÓĞÂµÄ²½Öè"""
+        self.current_status.append({'procedure': procedure, 'status': status})
+        self.current_prompt.append({'procedure': procedure, 'prompt': prompt})
+
+    def complete_step(self, procedure):
+        """±ê¼Ç²½ÖèÎªÍê³É×´Ì¬"""
+        self.update_status(procedure, 1)
+
+    def reset(self):
+        """ÖØÖÃ×´Ì¬µ½³õÊ¼×´Ì¬"""
+        self.current_status = self.initial_status.copy()
+        self.current_prompt = self.current_prompt.copy()  # ¸ù¾İĞèÒª¾ö¶¨ÊÇ·ñÒ²ÖØÖÃÌáÊ¾
